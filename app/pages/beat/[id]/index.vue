@@ -2,17 +2,7 @@
   <div class="min-h-screen pt-16 bg-gradient-to-b from-[#0f1219] to-[#0a0d14]">
     <!-- Back Button -->
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <NuxtLink
-        @click.prevent="goBack"
-        class="inline-flex items-center gap-2 text-gray-400 cursor-pointer hover:text-white transition-colors group"
-      >
-        <Icon
-          name="ph:arrow-left"
-          size="20"
-          class="group-hover:-translate-x-1 transition-transform"
-        />
-        <span class="font-medium">Back</span>
-      </NuxtLink>
+      <BackButton />
     </div>
 
     <!-- Loading State -->
@@ -456,7 +446,6 @@ const producerBeats = computed(() => {
     .slice(0, 5);
 });
 
-const { goBack } = useNavigation();
 const { playingBeatId, togglePlay } = useBeatPlayer();
 const { getLicenseLabel, getUsageTerms } = useLicenseData();
 

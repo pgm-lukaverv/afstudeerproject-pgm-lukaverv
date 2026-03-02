@@ -22,12 +22,7 @@
         <span v-else>Resend Verification Email</span>
       </button>
       <div class="mt-6">
-        <button
-          @click="goBack"
-          class="flex items-center justify-center w-full text-gray-400 hover:text-gray-300 transition"
-        >
-          <span class="mr-2">←</span> Back
-        </button>
+        <BackButton containerClass="w-full justify-center" />
       </div>
     </div>
   </div>
@@ -36,7 +31,6 @@
 <script setup>
 // Import necessary composables for route and navigation handling
 const route = useRoute();
-const { goBack } = useNavigation();
 
 // Reactive variables for managing state
 const loading = ref(false);
