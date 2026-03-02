@@ -1,9 +1,42 @@
 export default defineEventHandler(async (event) => {
   try {
+    const id = getRouterParam(event, "id");
+
+    if (!id) {
+      throw createError({
+        statusCode: 400,
+        message: "Producer ID is required",
+      });
+    }
+
+    // Fetch producer profile
+    const producer = await prisma.profile.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        bio: true,
+        role: true,
+        profilePicture: true,
+      },
+    });
+
+    if (!producer) {
+      throw createError({
+        statusCode: 404,
+        message: "Producer not found",
+      });
+    }
+
+    // Fetch all beats by this producer
     const beats = await prisma.beat.findMany({
       where: {
+        producerId: id,
         isPublished: true,
-        isExclusiveSold: false,
       },
       include: {
         producer: {
@@ -19,7 +52,7 @@ export default defineEventHandler(async (event) => {
       },
     });
 
-    // Format beats for frontend (convert duration to MM:SS format)
+    // Format beats for frontend
     const formattedBeats = beats.map((beat) => {
       const minutes = Math.floor(beat.duration / 60);
       const seconds = beat.duration % 60;
@@ -44,12 +77,15 @@ export default defineEventHandler(async (event) => {
       };
     });
 
-    return formattedBeats;
+    return {
+      producer,
+      beats: formattedBeats,
+    };
   } catch (error) {
-    console.error("Error fetching beats:", error);
+    console.error("Error fetching producer beats:", error);
     throw createError({
       statusCode: 500,
-      message: "Failed to fetch beats",
+      message: "Failed to fetch producer beats",
     });
   }
 });

@@ -2,12 +2,7 @@
   <div class="container mx-auto py-8 px-4 lg:px-6">
     <div class="max-w-7xl mx-auto">
       <div class="mb-8">
-        <button
-          @click="goBack"
-          class="flex items-center text-gray-400 hover:text-gray-300 transition mb-4"
-        >
-          <span class="mr-2">←</span> Back
-        </button>
+        <BackButton label="Back" containerClass="mb-4" />
         <h1 class="text-4xl font-bold text-white mb-3">Edit Profile</h1>
         <p class="text-gray-400 text-lg">Update your profile information</p>
       </div>
@@ -347,7 +342,6 @@ const success = ref("");
 const bioLength = ref(0);
 
 const { openUploadWidget } = useCloudinaryUpload();
-const { goBack } = useNavigation();
 
 // Initialize bio length on mount
 onMounted(() => {
