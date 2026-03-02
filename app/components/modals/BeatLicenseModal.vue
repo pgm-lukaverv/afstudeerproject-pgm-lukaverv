@@ -249,44 +249,10 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
-const selectedLicense = ref("basic");
+const { getLicenseLabel, getUsageTerms } = useLicenseData();
 
-const usageTerms = computed(() => {
-  switch (selectedLicense.value) {
-    case "basic":
-      return {
-        streams: "Max 100,000 streams",
-        monetization: "Monetization allowed",
-        exclusive: false,
-        exclusiveText: "Non-Exclusive rights",
-        exclusiveSubtext: "Beat remains publicly available",
-      };
-    case "premium":
-      return {
-        streams: "Max 500,000 streams",
-        monetization: "Monetization allowed",
-        exclusive: false,
-        exclusiveText: "Non-Exclusive rights",
-        exclusiveSubtext: "Beat remains publicly available",
-      };
-    case "exclusive":
-      return {
-        streams: "Unlimited streams",
-        monetization: "Full monetization",
-        exclusive: true,
-        exclusiveText: "Exclusive rights",
-        exclusiveSubtext: "Beat removed from store",
-      };
-    default:
-      return {
-        streams: "",
-        monetization: "",
-        exclusive: false,
-        exclusiveText: "",
-        exclusiveSubtext: "",
-      };
-  }
-});
+const selectedLicense = ref("basic");
+const usageTerms = computed(() => getUsageTerms(selectedLicense.value));
 
 const closeModal = () => {
   emit("close");
