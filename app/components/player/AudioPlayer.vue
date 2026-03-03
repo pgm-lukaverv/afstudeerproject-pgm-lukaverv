@@ -175,6 +175,7 @@ const sound = ref<Howl | null>(null);
 const waveformHeights = ref<number[]>([]);
 const waveformRef = ref<HTMLElement | null>(null);
 let rafId: number | null = null;
+let soundId: number | null = null;
 
 // Fetch all beats for next/previous functionality
 const { data: allBeats } = await useFetch("/api/beats");
@@ -228,17 +229,19 @@ watch(
 watch(
   () => audioStore.isPlaying,
   (playing) => {
-    if (trackJustLoaded) {
-      trackJustLoaded = false;
-      return;
-    }
+    if (trackJustLoaded) return;
     if (!sound.value) return;
-    playing ? sound.value.play() : sound.value.pause();
+    if (playing && !sound.value.playing(soundId ?? undefined)) {
+      sound.value.play(soundId ?? undefined);
+    } else if (!playing && sound.value.playing(soundId ?? undefined)) {
+      sound.value.pause(soundId ?? undefined);
+    }
   },
 );
 
 async function loadTrack(track: Track) {
   sound.value?.unload();
+  soundId = null;
   currentTime.value = 0;
   actualDuration.value = 0;
 
@@ -255,7 +258,9 @@ async function loadTrack(track: Track) {
         actualDuration.value = sound.value.duration();
       }
     },
-    onplay() {
+    onplay(id: number) {
+      soundId = id;
+      trackJustLoaded = false; // Reset here, after sound is actually playing
       audioStore.setIsPlaying(true);
       tick();
     },
@@ -282,7 +287,7 @@ async function loadTrack(track: Track) {
 function tick() {
   if (rafId !== null) cancelAnimationFrame(rafId);
   if (!sound.value) return;
-  currentTime.value = (sound.value.seek() as number) ?? 0;
+  currentTime.value = (sound.value.seek(soundId ?? undefined) as number) ?? 0;
   if (audioStore.isPlaying) {
     rafId = requestAnimationFrame(tick);
   } else {
@@ -304,7 +309,7 @@ function seek(e: MouseEvent) {
   const duration = actualDuration.value || audioStore.currentTrack.duration;
   const time = percentage * duration;
 
-  sound.value.seek(time);
+  sound.value.seek(time, soundId ?? undefined);
   currentTime.value = time; // Immediately update for visual feedback
   // Always restart tick loop so waveform + timer continue updating
   tick();

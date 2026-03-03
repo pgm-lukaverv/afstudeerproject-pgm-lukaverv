@@ -58,8 +58,7 @@
                   :alt="beat.title"
                   class="h-12 w-12 md:h-14 md:w-14 rounded object-cover"
                 />
-                <!-- Play/Pause Overlay -->
-                <!-- Waveform animation while playing -->
+                <!-- Waveform animation when this beat is playing -->
                 <div
                   v-if="playingBeatId === String(beat.id) && isPlaying"
                   class="absolute inset-0 flex items-center justify-center bg-black/50 rounded backdrop-blur-sm"
@@ -76,14 +75,7 @@
                     ></div>
                   </div>
                 </div>
-                <!-- Pause icon when the track is loaded but paused -->
-                <div
-                  v-else-if="playingBeatId === String(beat.id) && !isPlaying"
-                  class="absolute inset-0 flex items-center justify-center bg-black/50 rounded backdrop-blur-sm"
-                >
-                  <Icon name="ph:pause-fill" class="text-white text-xl" />
-                </div>
-                <!-- Play icon on hover for unselected beats -->
+                <!-- Play icon on hover -->
                 <div
                   v-else
                   class="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
@@ -261,7 +253,7 @@ defineOptions({
 });
 
 // Beat player state
-const { playingBeatId, togglePlay } = useBeatPlayer();
+const { playingBeatId, isPlaying, togglePlay } = useBeatPlayer();
 
 // License modal handler
 const openLicenseModal = (beat) => {
