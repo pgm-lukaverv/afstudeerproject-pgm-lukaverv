@@ -42,7 +42,7 @@
           <div
             v-for="beat in items"
             :key="beat.id"
-            @click="togglePlay(beat.id)"
+            @click="navigateToBeat(beat.id)"
             :class="
               playingBeatId === beat.id ? 'bg-blue-600/5' : 'hover:bg-[#1a1f35]'
             "
@@ -58,13 +58,13 @@
                   :alt="beat.title"
                   class="h-12 w-12 md:h-14 md:w-14 rounded object-cover"
                 />
-                <!-- Play/Pause Overlay -->
+                <!-- Waveform animation when this beat is playing -->
                 <div
-                  v-if="playingBeatId === beat.id"
-                  class="absolute inset-0 flex items-center justify-center bg-black/50 rounded backdrop-blur-sm"
+                  v-if="playingBeatId === String(beat.id) && isPlaying"
+                  @click.stop.prevent="togglePlay(beat)"
+                  class="absolute inset-0 flex items-center justify-center bg-black/50 rounded backdrop-blur-sm cursor-pointer"
                 >
-                  <!-- Animated Equalizer Bars When Playing -->
-                  <div class="flex items-center gap-0.5 h-5">
+                  <div class="flex items-end gap-0.5 h-5">
                     <div
                       class="w-0.5 bg-blue-400 rounded-full animate-eq-bar-1"
                     ></div>
@@ -76,30 +76,26 @@
                     ></div>
                   </div>
                 </div>
-                <div
+                <!-- Play button on hover -->
+                <button
                   v-else
+                  @click.stop.prevent="togglePlay(beat)"
                   class="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
                 >
                   <Icon name="ph:play-fill" class="text-white text-xl" />
-                </div>
+                </button>
               </div>
               <div class="min-w-0 flex-1">
-                <NuxtLink
-                  :to="`/beat/${beat.id}`"
-                  @click.stop
-                  class="w-fit max-w-full block"
+                <h3
+                  :class="
+                    playingBeatId === String(beat.id)
+                      ? 'text-blue-400'
+                      : 'text-white group-hover:text-blue-400'
+                  "
+                  class="text-sm md:text-base font-bold transition-colors duration-150 truncate"
                 >
-                  <h3
-                    :class="
-                      playingBeatId === beat.id
-                        ? 'text-blue-400'
-                        : 'text-white hover:text-blue-400'
-                    "
-                    class="text-sm md:text-base font-bold transition-colors duration-150 truncate"
-                  >
-                    {{ beat.title }}
-                  </h3>
-                </NuxtLink>
+                  {{ beat.title }}
+                </h3>
                 <NuxtLink
                   v-if="showProducer"
                   :to="`/profile/${beat.producerUserId}`"
@@ -155,13 +151,13 @@
                 </span>
               </div>
               <button
-                @click.stop
+                @click.stop.prevent
                 class="hidden md:block text-gray-400 hover:text-white transition-colors"
               >
                 <Icon name="ph:share-network" size="20" />
               </button>
               <button
-                @click.stop="openLicenseModal(beat)"
+                @click.stop.prevent="openLicenseModal(beat)"
                 class="bg-gray-800 hover:bg-gray-700 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition flex items-center gap-1.5 md:gap-2 font-semibold whitespace-nowrap text-sm"
               >
                 <Icon name="ph:shopping-cart" size="16" class="md:hidden" />
@@ -253,7 +249,10 @@ defineOptions({
 });
 
 // Beat player state
-const { playingBeatId, togglePlay } = useBeatPlayer();
+const { playingBeatId, isPlaying, togglePlay } = useBeatPlayer();
+
+// Navigation
+const { navigateToBeat } = useNavigation();
 
 // License modal handler
 const openLicenseModal = (beat) => {

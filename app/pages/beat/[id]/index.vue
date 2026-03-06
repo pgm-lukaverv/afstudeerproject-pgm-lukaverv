@@ -67,21 +67,40 @@
               :alt="beat.title"
               class="w-full aspect-square rounded-xl object-cover"
             />
+            <!-- Waveform animation when playing -->
+            <div
+              v-if="playingBeatId === String(beat.id) && isPlaying"
+              @click="togglePlay(beat)"
+              class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center cursor-pointer"
+            >
+              <div class="flex items-end gap-1.5 h-16">
+                <div
+                  class="w-2 bg-blue-400 rounded-full animate-eq-bar-1"
+                ></div>
+                <div
+                  class="w-2 bg-blue-400 rounded-full animate-eq-bar-2"
+                ></div>
+                <div
+                  class="w-2 bg-blue-400 rounded-full animate-eq-bar-3"
+                ></div>
+                <div
+                  class="w-2 bg-blue-400 rounded-full animate-eq-bar-2"
+                ></div>
+                <div
+                  class="w-2 bg-blue-400 rounded-full animate-eq-bar-1"
+                ></div>
+              </div>
+            </div>
             <!-- Play Button Overlay -->
             <div
-              @click="togglePlay(beat.id)"
+              v-else
+              @click="togglePlay(beat)"
               class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             >
               <div
                 class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
               >
-                <Icon
-                  :name="
-                    playingBeatId === beat.id ? 'ph:pause-fill' : 'ph:play-fill'
-                  "
-                  class="text-white text-3xl"
-                  :class="playingBeatId !== beat.id ? 'ml-1' : ''"
-                />
+                <Icon name="ph:play-fill" class="text-white text-3xl ml-1" />
               </div>
             </div>
           </div>
@@ -386,23 +405,38 @@
                     :alt="producerBeat.title"
                     class="w-full aspect-square rounded-lg object-cover"
                   />
+                  <!-- Waveform animation when playing -->
                   <div
-                    @click.stop="togglePlay(producerBeat.id)"
+                    v-if="
+                      playingBeatId === String(producerBeat.id) && isPlaying
+                    "
+                    @click.stop="togglePlay(producerBeat)"
+                    class="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center cursor-pointer"
+                  >
+                    <div class="flex items-end gap-1 h-10">
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-1"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-2"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-3"
+                      ></div>
+                    </div>
+                  </div>
+                  <!-- Play button overlay -->
+                  <div
+                    v-else
+                    @click.stop="togglePlay(producerBeat)"
                     class="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     <div
                       class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
                     >
                       <Icon
-                        :name="
-                          playingBeatId === producerBeat.id
-                            ? 'ph:pause-fill'
-                            : 'ph:play-fill'
-                        "
-                        class="text-white text-xl"
-                        :class="
-                          playingBeatId !== producerBeat.id ? 'ml-0.5' : ''
-                        "
+                        name="ph:play-fill"
+                        class="text-white text-xl ml-0.5"
                       />
                     </div>
                   </div>
@@ -446,7 +480,7 @@ const producerBeats = computed(() => {
     .slice(0, 5);
 });
 
-const { playingBeatId, togglePlay } = useBeatPlayer();
+const { playingBeatId, isPlaying, togglePlay } = useBeatPlayer();
 const { getLicenseLabel, getUsageTerms } = useLicenseData();
 
 // License selection
@@ -456,3 +490,50 @@ const selectedLicenseLabel = computed(() =>
 );
 const usageTerms = computed(() => getUsageTerms(selectedLicense.value));
 </script>
+
+<style scoped>
+/* Animated Equalizer Bars */
+@keyframes eq-bar-1 {
+  0%,
+  100% {
+    height: 16px;
+  }
+  50% {
+    height: 40px;
+  }
+}
+
+@keyframes eq-bar-2 {
+  0%,
+  100% {
+    height: 24px;
+  }
+  50% {
+    height: 52px;
+  }
+}
+
+@keyframes eq-bar-3 {
+  0%,
+  100% {
+    height: 20px;
+  }
+  50% {
+    height: 48px;
+  }
+}
+
+.animate-eq-bar-1 {
+  animation: eq-bar-1 0.6s ease-in-out infinite;
+}
+
+.animate-eq-bar-2 {
+  animation: eq-bar-2 0.8s ease-in-out infinite;
+  animation-delay: 0.1s;
+}
+
+.animate-eq-bar-3 {
+  animation: eq-bar-3 0.7s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+</style>
