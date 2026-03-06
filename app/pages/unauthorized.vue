@@ -38,7 +38,8 @@
           Discover Beats
         </NuxtLink>
         <NuxtLink
-          to="/profile"
+          v-if="profileUrl"
+          :to="profileUrl"
           class="px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white font-medium rounded-lg transition-colors"
         >
           Go to Profile
@@ -48,7 +49,11 @@
       <!-- Help Text -->
       <p class="mt-8 text-sm text-gray-500">
         Want to become a producer?
-        <NuxtLink to="/profile" class="text-primary-500 hover:text-primary-400">
+        <NuxtLink
+          v-if="profileUrl"
+          :to="profileUrl"
+          class="text-primary-500 hover:text-primary-400"
+        >
           Update your profile
         </NuxtLink>
       </p>
@@ -57,8 +62,10 @@
 </template>
 
 <script setup lang="ts">
-// Page meta
 definePageMeta({
-  layout: false, // No layout for this page
+  layout: false,
 });
+
+const user = await useCurrentUser();
+const profileUrl = user ? `/profile/${user.id}` : null;
 </script>

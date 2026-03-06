@@ -376,7 +376,6 @@ useHead({
   ],
 });
 
-const { data: session } = useAuth();
 const config = useRuntimeConfig();
 const loading = ref(false);
 const error = ref("");
@@ -435,18 +434,8 @@ const handleSubmit = async () => {
   error.value = "";
 
   try {
-    let userId = (session.value?.user as any)?.id;
-
-    // If no user ID in session (manual login), fetch from JWT token
-    if (!userId) {
-      try {
-        const userData = await $fetch("/api/auth/user");
-        userId = userData.id;
-      } catch (err) {
-        error.value = "User session not found. Please log in again.";
-        return;
-      }
-    }
+    const currentUser = await useCurrentUser();
+    const userId = currentUser?.id;
 
     if (!userId) {
       error.value = "User session not found. Please log in again.";

@@ -3,23 +3,13 @@ definePageMeta({
   middleware: "require-verification",
 });
 
-const router = useRouter();
+const user = await useCurrentUser();
 
-// Fetch current user
-const { data: currentUser } = await useFetch("/api/auth/user", {
-  credentials: "include",
-});
-
-// redirect to own profile if visiting /profile
-watch(
-  () => currentUser.value,
-  (user) => {
-    if (user && router.currentRoute.value.path === "/profile") {
-      navigateTo(`/profile/${user.id}`);
-    }
-  },
-  { immediate: true },
-);
+if (user) {
+  await navigateTo(`/profile/${user.id}`, { replace: true });
+} else {
+  await navigateTo("/auth/login", { replace: true });
+}
 </script>
 
 <template>
