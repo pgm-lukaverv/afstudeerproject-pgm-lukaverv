@@ -8,6 +8,13 @@
         beats.
       </p>
 
+      <NuxtLink
+        to="beat/create"
+        class="mt-4 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+      >
+        Create New Beat
+      </NuxtLink>
+
       <div class="mt-6">
         <NuxtLink
           to="/profile"
