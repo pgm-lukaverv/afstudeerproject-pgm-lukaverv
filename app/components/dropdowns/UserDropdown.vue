@@ -114,6 +114,8 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   closeDropdown();
+  // Clear JWT cookie (manual login) and OAuth session
+  await $fetch("/api/auth/logout", { method: "POST" });
   await signOut({ callbackUrl: "/auth/login" });
 
   // Clear cached user data
