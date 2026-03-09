@@ -1,9 +1,22 @@
 export const useCloudinaryUpload = () => {
   const config = useRuntimeConfig();
 
-  const openUploadWidget = (onSuccess: (url: string) => void) => {
+  type UploadOptions = {
+    folder?: string;
+    cropping?: boolean;
+    croppingAspectRatio?: number;
+    clientAllowedFormats?: string[];
+    maxFileSize?: number;
+    uploadPreset?: string;
+  };
+
+  const openUploadWidget = (
+    onSuccess: (url: string) => void,
+    options: UploadOptions = {},
+  ) => {
     const cloudName = (config.public.cloudinary as any).cloudName;
-    const uploadPreset = (config.public.cloudinary as any).uploadPreset;
+    const uploadPreset =
+      options.uploadPreset || (config.public.cloudinary as any).uploadPreset;
 
     if (!cloudName || !uploadPreset) {
       console.error("Upload configuration missing");
@@ -20,12 +33,18 @@ export const useCloudinaryUpload = () => {
           sources: ["local"],
           multiple: false,
           maxFiles: 1,
-          clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp"],
-          maxFileSize: 5000000,
-          folder: "profiles",
-          cropping: true,
+          clientAllowedFormats: options.clientAllowedFormats || [
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "webp",
+          ],
+          maxFileSize: options.maxFileSize || 5000000,
+          folder: options.folder || "profiles",
+          cropping: options.cropping ?? true,
           showSkipCropButton: false,
-          croppingAspectRatio: 1,
+          croppingAspectRatio: options.croppingAspectRatio || 1,
           croppingDefaultSelectionRatio: 0.8,
           croppingShowDimensions: true,
           croppingCoordinatesMode: "custom",

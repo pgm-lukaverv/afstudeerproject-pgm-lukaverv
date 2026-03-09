@@ -244,19 +244,24 @@
                 <p class="text-xs font-medium text-gray-400 mb-1.5">
                   WAV <span class="text-gray-500">(untagged)</span>
                 </p>
-                <label
+                <div
                   class="flex items-center gap-3 bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
+                  :class="wavUrl ? 'border-green-600' : ''"
+                  @click="handleWavUpload"
                 >
-                  <input type="file" accept=".wav,audio/wav" class="hidden" />
                   <Icon
                     name="ph:waveform"
-                    class="w-5 h-5 text-gray-400 flex-shrink-0"
+                    class="w-5 h-5 flex-shrink-0"
+                    :class="wavUrl ? 'text-green-400' : 'text-gray-400'"
                   />
-                  <span class="flex-1 text-sm text-gray-400 truncate"
-                    >Upload WAV file</span
+                  <span
+                    class="flex-1 text-sm truncate"
+                    :class="wavUrl ? 'text-green-400' : 'text-gray-400'"
                   >
+                    {{ wavUrl ? "WAV uploaded ✓" : "Upload WAV file" }}
+                  </span>
                   <Icon name="ph:upload-simple" class="w-4 h-4 text-gray-500" />
-                </label>
+                </div>
                 <p class="text-xs text-gray-600 mt-1">WAV only, max 100 MB</p>
               </div>
 
@@ -265,19 +270,24 @@
                 <p class="text-xs font-medium text-gray-400 mb-1.5">
                   MP3 <span class="text-gray-500">(tagged)</span>
                 </p>
-                <label
+                <div
                   class="flex items-center gap-3 bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
+                  :class="mp3Url ? 'border-green-600' : ''"
+                  @click="handleMp3Upload"
                 >
-                  <input type="file" accept=".mp3,audio/mpeg" class="hidden" />
                   <Icon
                     name="ph:music-note"
-                    class="w-5 h-5 text-gray-400 flex-shrink-0"
+                    class="w-5 h-5 flex-shrink-0"
+                    :class="mp3Url ? 'text-green-400' : 'text-gray-400'"
                   />
-                  <span class="flex-1 text-sm text-gray-400 truncate"
-                    >Upload MP3 file</span
+                  <span
+                    class="flex-1 text-sm truncate"
+                    :class="mp3Url ? 'text-green-400' : 'text-gray-400'"
                   >
+                    {{ mp3Url ? "MP3 uploaded ✓" : "Upload MP3 file" }}
+                  </span>
                   <Icon name="ph:upload-simple" class="w-4 h-4 text-gray-500" />
-                </label>
+                </div>
                 <p class="text-xs text-gray-600 mt-1">MP3 only, max 50 MB</p>
               </div>
             </div>
@@ -328,14 +338,54 @@ definePageMeta({
   middleware: "producer-only",
 });
 
+const config = useRuntimeConfig();
 const { openUploadWidget } = useCloudinaryUpload();
 
 const beatCoverUrl = ref("");
+const wavUrl = ref("");
+const mp3Url = ref("");
 
 const handleBeatCoverUpload = () => {
-  openUploadWidget((url: string) => {
-    beatCoverUrl.value = url;
-  });
+  openUploadWidget(
+    (url: string) => {
+      beatCoverUrl.value = url;
+    },
+    {
+      folder: "beatstack-beat-covers",
+      cropping: true,
+      croppingAspectRatio: 1,
+    },
+  );
+};
+
+const handleWavUpload = () => {
+  openUploadWidget(
+    (url: string) => {
+      wavUrl.value = url;
+    },
+    {
+      uploadPreset: (config.public.cloudinary as any).audioPreset,
+      folder: "beatstack-audio-files/wav",
+      clientAllowedFormats: ["wav"],
+      maxFileSize: 100 * 1024 * 1024, // 100 MB
+      cropping: false,
+    },
+  );
+};
+
+const handleMp3Upload = () => {
+  openUploadWidget(
+    (url: string) => {
+      mp3Url.value = url;
+    },
+    {
+      uploadPreset: (config.public.cloudinary as any).audioPreset,
+      folder: "beatstack-audio-files/mp3",
+      clientAllowedFormats: ["mp3"],
+      maxFileSize: 50 * 1024 * 1024, // 50 MB
+      cropping: false,
+    },
+  );
 };
 
 const title = ref("");

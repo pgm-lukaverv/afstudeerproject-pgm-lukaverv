@@ -474,8 +474,15 @@ const handleSubmit = async () => {
 const { openUploadWidget } = useCloudinaryUpload();
 
 const handleUploadClick = () => {
-  openUploadWidget((url: string) => {
-    form.value.profilePicture = url;
-  });
+  openUploadWidget(
+    (url: string) => {
+      form.value.profilePicture = url;
+    },
+    {
+      folder: "beatstack-profile-pictures",
+      cropping: true,
+      croppingAspectRatio: 1,
+    },
+  );
 };
 </script>
