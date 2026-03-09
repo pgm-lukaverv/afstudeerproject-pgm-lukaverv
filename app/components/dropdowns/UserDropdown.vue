@@ -40,7 +40,7 @@
         <div class="py-1">
           <!-- Profile -->
           <NuxtLink
-            to="/profile"
+            :to="`/profile/${userProfile?.userId}`"
             @click="closeDropdown"
             class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
           >
@@ -114,6 +114,8 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   closeDropdown();
+  // Clear JWT cookie (manual login) and OAuth session
+  await $fetch("/api/auth/logout", { method: "POST" });
   await signOut({ callbackUrl: "/auth/login" });
 
   // Clear cached user data

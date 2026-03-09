@@ -177,6 +177,8 @@ const { signOut } = useAuth();
 // Handle logout from mobile menu
 const handleLogout = async () => {
   emit("close");
+  // Clear JWT cookie (manual login) and OAuth session
+  await $fetch("/api/auth/logout", { method: "POST" });
   await signOut({ callbackUrl: "/auth/login" });
 
   // Clear cached user data

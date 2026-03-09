@@ -415,9 +415,7 @@ const profileId = route.params.id;
 const { playingBeatId, isPlaying, togglePlay } = useBeatPlayer();
 
 // Fetch logged-in user to check if viewing own profile
-const { data: currentUser } = await useFetch("/api/auth/user", {
-  credentials: "include",
-});
+const currentUser = await useCurrentUser();
 
 // Fetch profile by user ID
 const {
@@ -427,7 +425,7 @@ const {
 } = await useFetch(`/api/profile/${profileId}`);
 
 // Check if this is the logged-in user's own profile
-const isOwnProfile = computed(() => currentUser.value?.id === profileId);
+const isOwnProfile = computed(() => currentUser?.id === profileId);
 
 // Parse social links
 const socialLinks = computed(() => {
@@ -462,6 +460,9 @@ const popularTracks = computed(() => {
   if (!beatsData.value?.beats) return [];
   return beatsData.value.beats.slice(0, 5);
 });
+
+// Sync popular tracks to audio player playlist
+usePlaylistSync(popularTracks);
 
 // Playlists - temporarily use beats (will implement playlists later)
 const playlists = computed(() => {

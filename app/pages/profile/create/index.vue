@@ -158,17 +158,20 @@
                 class="block text-sm font-medium text-gray-300 mb-2"
                 >Biography (Optional)</label
               >
-              <textarea
-                id="bio"
-                v-model="form.bio"
-                rows="7"
-                maxlength="500"
-                class="flex-1 px-4 py-3 bg-[#0d1230] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                placeholder="Tell us about yourself..."
-              />
-              <p class="mt-1 text-xs text-gray-500">
-                {{ form.bio?.length || 0 }}/500 characters
-              </p>
+              <InputCharCount
+                :current="form.bio?.length || 0"
+                :max="500"
+                position="bottom"
+              >
+                <textarea
+                  id="bio"
+                  v-model="form.bio"
+                  rows="7"
+                  maxlength="500"
+                  class="w-full px-4 py-3 pb-7 bg-[#0d1230] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                  placeholder="Tell us about yourself..."
+                />
+              </InputCharCount>
             </div>
 
             <!-- Right Column: Profile Picture & Social Links -->
@@ -376,7 +379,6 @@ useHead({
   ],
 });
 
-const { data: session } = useAuth();
 const config = useRuntimeConfig();
 const loading = ref(false);
 const error = ref("");
@@ -435,18 +437,8 @@ const handleSubmit = async () => {
   error.value = "";
 
   try {
-    let userId = (session.value?.user as any)?.id;
-
-    // If no user ID in session (manual login), fetch from JWT token
-    if (!userId) {
-      try {
-        const userData = await $fetch("/api/auth/user");
-        userId = userData.id;
-      } catch (err) {
-        error.value = "User session not found. Please log in again.";
-        return;
-      }
-    }
+    const currentUser = await useCurrentUser();
+    const userId = currentUser?.id;
 
     if (!userId) {
       error.value = "User session not found. Please log in again.";
@@ -482,8 +474,15 @@ const handleSubmit = async () => {
 const { openUploadWidget } = useCloudinaryUpload();
 
 const handleUploadClick = () => {
-  openUploadWidget((url: string) => {
-    form.value.profilePicture = url;
-  });
+  openUploadWidget(
+    (url: string) => {
+      form.value.profilePicture = url;
+    },
+    {
+      folder: "beatstack-profile-pictures",
+      cropping: true,
+      croppingAspectRatio: 1,
+    },
+  );
 };
 </script>

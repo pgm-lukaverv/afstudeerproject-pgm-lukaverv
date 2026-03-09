@@ -356,9 +356,16 @@ const updateBioLength = (event: Event) => {
 
 // Function to open Cloudinary upload widget
 const handleUploadClick = () => {
-  openUploadWidget((url: string) => {
-    newProfilePicture.value = url;
-  });
+  openUploadWidget(
+    (url: string) => {
+      newProfilePicture.value = url;
+    },
+    {
+      folder: "beatstack-profile-pictures",
+      cropping: true,
+      croppingAspectRatio: 1,
+    },
+  );
 };
 
 // Function to save profile changes
