@@ -2,33 +2,39 @@
   <div
     class="min-h-screen pt-16 bg-gradient-to-br from-[#0a0e27] via-[#0d1230] to-[#0a0e27]"
   >
-    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-6 md:py-8">
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-6 md:mb-8">
         <BackButton label="Back" class="mb-4" />
-        <h1 class="text-4xl font-bold text-white mb-2">Upload a Beat</h1>
-        <p class="text-gray-400">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
+          Upload a Beat
+        </h1>
+        <p class="text-sm md:text-base text-gray-400">
           Fill in the details and upload your beat to the marketplace
         </p>
       </div>
 
       <form @submit.prevent="handleSubmit">
-        <div class="flex gap-8 items-start">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           <!-- Left: scrollable -->
-          <div class="flex-1 min-w-0 space-y-6">
+          <div class="w-full lg:flex-1 lg:min-w-0 space-y-4 md:space-y-6">
             <!-- Basic Info -->
             <div
-              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-6 shadow-xl"
+              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-4 md:p-6 shadow-xl"
             >
-              <h2 class="text-lg font-bold text-white mb-5">Basic Info</h2>
-              <div class="flex gap-5 items-stretch">
+              <h2
+                class="text-base md:text-lg font-bold text-white mb-4 md:mb-5"
+              >
+                Basic Info
+              </h2>
+              <div class="flex flex-col sm:flex-row gap-5 items-stretch">
                 <!-- Beat Cover -->
                 <div class="flex-shrink-0 flex flex-col">
                   <p class="text-xs font-medium text-gray-400 mb-2">
                     Beat cover
                   </p>
                   <div
-                    class="flex-1 w-48 rounded-xl border-2 border-dashed border-gray-600 bg-[#0d1230] flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer hover:border-blue-500 transition-colors min-h-[8rem] overflow-hidden"
+                    class="flex-1 w-full sm:w-48 aspect-square sm:aspect-auto rounded-xl border-2 border-dashed border-gray-600 bg-[#0d1230] flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer hover:border-blue-500 transition-colors sm:min-h-[8rem] overflow-hidden"
                     @click="handleBeatCoverUpload"
                   >
                     <img
@@ -84,10 +90,14 @@
 
             <!-- Metadata -->
             <div
-              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-6 shadow-xl"
+              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-4 md:p-6 shadow-xl"
             >
-              <h2 class="text-lg font-bold text-white mb-5">Metadata</h2>
-              <div class="grid grid-cols-2 gap-4 mb-4">
+              <h2
+                class="text-base md:text-lg font-bold text-white mb-4 md:mb-5"
+              >
+                Metadata
+              </h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label class="block text-xs font-medium text-gray-400 mb-1"
                     >Key</label
@@ -178,12 +188,18 @@
 
             <!-- Pricing -->
             <div
-              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-6 shadow-xl"
+              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-4 md:p-6 shadow-xl"
             >
-              <h2 class="text-lg font-bold text-white mb-5">Pricing</h2>
+              <h2
+                class="text-base md:text-lg font-bold text-white mb-4 md:mb-5"
+              >
+                Pricing
+              </h2>
               <div class="space-y-3">
-                <div class="flex items-center gap-4">
-                  <div class="w-28 text-sm text-gray-300">Basic</div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                >
+                  <div class="sm:w-28 text-sm text-gray-300">Basic</div>
                   <div class="relative flex-1">
                     <span
                       class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -199,8 +215,10 @@
                     />
                   </div>
                 </div>
-                <div class="flex items-center gap-4">
-                  <div class="w-28 text-sm text-gray-300">Premium</div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                >
+                  <div class="sm:w-28 text-sm text-gray-300">Premium</div>
                   <div class="relative flex-1">
                     <span
                       class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -216,8 +234,10 @@
                     />
                   </div>
                 </div>
-                <div class="flex items-center gap-4">
-                  <div class="w-28 text-sm text-gray-300">Exclusive</div>
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                >
+                  <div class="sm:w-28 text-sm text-gray-300">Exclusive</div>
                   <div class="relative flex-1">
                     <span
                       class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -238,12 +258,16 @@
           </div>
 
           <!-- Right: sticky sidebar -->
-          <div class="w-80 flex-shrink-0 sticky top-20 self-start space-y-4">
+          <div
+            class="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-20 self-start space-y-4"
+          >
             <!-- Audio Files -->
             <div
-              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-5 shadow-xl"
+              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-4 md:p-5 shadow-xl"
             >
-              <h2 class="text-sm font-bold text-white mb-4">Audio Files</h2>
+              <h2 class="text-sm md:text-base font-bold text-white mb-4">
+                Audio Files
+              </h2>
 
               <!-- WAV Untagged -->
               <div class="mb-3">
@@ -300,9 +324,11 @@
 
             <!-- Visibility -->
             <div
-              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-5 shadow-xl"
+              class="bg-[#161b33] border border-gray-700/50 rounded-2xl p-4 md:p-5 shadow-xl"
             >
-              <h2 class="text-sm font-bold text-white mb-3">Visibility</h2>
+              <h2 class="text-sm md:text-base font-bold text-white mb-3">
+                Visibility
+              </h2>
               <select
                 v-model="isPublished"
                 class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500"
@@ -319,7 +345,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
             >
               {{ loading ? "Publishing..." : "Publish Beat" }}
             </button>
