@@ -70,6 +70,12 @@ export default defineEventHandler(async (event) => {
             username: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -105,6 +111,8 @@ export default defineEventHandler(async (event) => {
         createdAt: beat.createdAt,
         isPublished: beat.isPublished,
         isExclusiveSold: beat.isExclusiveSold,
+        likesCount: beat._count.likes,
+        commentsCount: beat._count.comments,
       };
     });
 

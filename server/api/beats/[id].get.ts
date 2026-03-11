@@ -21,6 +21,12 @@ export default defineEventHandler(async (event) => {
             username: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
       },
     });
 
@@ -56,6 +62,8 @@ export default defineEventHandler(async (event) => {
       audioUrl: beat.audioFile,
       isPublished: beat.isPublished,
       isExclusiveSold: beat.isExclusiveSold,
+      likesCount: beat._count.likes,
+      commentsCount: beat._count.comments,
     };
   } catch (error) {
     console.error("Error fetching beat:", error);
