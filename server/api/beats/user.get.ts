@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { getToken } from "#auth";
+import { formatDuration } from "~~/server/utils/formatters";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -84,9 +85,7 @@ export default defineEventHandler(async (event) => {
 
     // Format beats for frontend
     const formattedBeats = beats.map((beat) => {
-      const minutes = Math.floor(beat.duration / 60);
-      const seconds = beat.duration % 60;
-      const formattedDuration = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      const formattedDuration = formatDuration(beat.duration);
 
       return {
         _id: beat.id,

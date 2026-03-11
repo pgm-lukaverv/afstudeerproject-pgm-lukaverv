@@ -1,3 +1,5 @@
+import { formatDuration } from "~~/server/utils/formatters";
+
 export default defineEventHandler(async (event) => {
   try {
     const beats = await prisma.beat.findMany({
@@ -27,9 +29,7 @@ export default defineEventHandler(async (event) => {
 
     // Format beats for frontend (convert duration to MM:SS format)
     const formattedBeats = beats.map((beat) => {
-      const minutes = Math.floor(beat.duration / 60);
-      const seconds = beat.duration % 60;
-      const formattedDuration = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      const formattedDuration = formatDuration(beat.duration);
 
       return {
         id: beat.id,
