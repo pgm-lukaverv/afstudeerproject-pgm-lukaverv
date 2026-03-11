@@ -91,11 +91,19 @@
           >
             {{ userData.username }}
           </h1>
+
+          <!-- Follow Button -->
+          <button
+            v-if="!isOwnProfile"
+            class="mt-6 px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200"
+          >
+            Follow
+          </button>
         </div>
 
         <!-- Stats Grid -->
         <div
-          class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
+          class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
         >
           <!-- Followers -->
           <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
@@ -105,20 +113,6 @@
             </div>
             <div class="text-xs md:text-sm text-gray-400 font-medium">
               Followers
-            </div>
-          </div>
-
-          <!-- Following -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
-            <Icon
-              name="ph:user-plus"
-              class="text-gray-400 text-2xl mx-auto mb-2"
-            />
-            <div class="text-xl md:text-2xl font-bold text-white mb-1">
-              {{ userData.stats?.following || 0 }}
-            </div>
-            <div class="text-xs md:text-sm text-gray-400 font-medium">
-              Following
             </div>
           </div>
 
@@ -151,9 +145,7 @@
           </div>
 
           <!-- Member Since -->
-          <div
-            class="col-span-2 md:col-span-1 text-center p-4 bg-[#0f1219]/50 rounded-lg"
-          >
+          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
             <Icon
               name="ph:calendar-check"
               class="text-gray-400 text-2xl mx-auto mb-2"

@@ -262,7 +262,6 @@ definePageMeta({
   middleware: "producer-only",
 });
 
-const { data: session } = useAuth();
 const activeTab = ref("analytics");
 
 // Pagination state for tracks tab
