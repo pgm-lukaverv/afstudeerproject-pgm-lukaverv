@@ -20,19 +20,23 @@ model User {
 }
 
 model Profile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
+  id             String    @id @default(cuid())
+  userId         String    @unique
   firstName      String
   lastName       String
-  username       String   @unique
+  username       String    @unique
   role           Role
-  bio            String?  @db.VarChar(500) // Optional, max length 500 characters
+  bio            String?   @db.VarChar(500) // Optional, max length 500 characters
   profilePicture String? // URL to the user's profile picture
   socialLinks    Json? // JSON for social links like Instagram, Twitter, etc.
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   beats          Beat[] // Relation to beats uploaded by this producer
+  likes          Like[]
+  comments       Comment[]
+  following      Follow[]  @relation("Following")
+  followers      Follow[]  @relation("Followers")
 }
 
 model Beat {
@@ -54,13 +58,15 @@ model Beat {
 
   coverImage    String // URL to cover image
   audioFile     String // URL to audio file (mp3/wav)
-  description   String?  @db.VarChar(1000)
-  isPublished   Boolean  @default(false)
-  playCount     Int      @default(0)
-  downloadCount Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  producer      Profile  @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  description   String?   @db.VarChar(1000)
+  isPublished   Boolean   @default(false)
+  playCount     Int       @default(0)
+  downloadCount Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  producer      Profile   @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  likes         Like[]
+  comments      Comment[]
 
   @@index([genre])
   @@index([bpm])
@@ -68,6 +74,48 @@ model Beat {
   @@index([isPublished])
   @@index([isExclusiveSold])
   @@index([createdAt])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  profileId String
+  beatId    String
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  beat    Beat    @relation(fields: [beatId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, beatId])
+  @@index([beatId])
+  @@index([profileId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  profileId String
+  beatId    String
+  text      String   @db.VarChar(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  beat    Beat    @relation(fields: [beatId], references: [id], onDelete: Cascade)
+
+  @@index([beatId])
+  @@index([profileId])
+}
+
+model Follow {
+  id                 String   @id @default(cuid())
+  followerProfileId  String
+  followingProfileId String
+  createdAt          DateTime @default(now())
+
+  follower  Profile @relation("Following", fields: [followerProfileId], references: [id], onDelete: Cascade)
+  following Profile @relation("Followers", fields: [followingProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([followerProfileId, followingProfileId])
+  @@index([followingProfileId])
 }
 
 enum Role {
