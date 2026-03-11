@@ -59,7 +59,7 @@
     >
       <div class="grid lg:grid-cols-[320px_1fr] gap-8">
         <!-- Left Sidebar -->
-        <div class="space-y-6">
+        <div class="space-y-6 lg:sticky lg:top-32">
           <!-- Beat Cover Image -->
           <div class="relative group">
             <img
@@ -116,6 +116,30 @@
             >
               {{ beat.producer }}
             </NuxtLink>
+          </div>
+
+          <!-- Interaction Buttons -->
+          <div class="flex gap-4">
+            <button
+              @click="isLiked = !isLiked"
+              :class="
+                isLiked ? 'text-red-400' : 'text-gray-400 hover:text-red-400'
+              "
+              class="flex items-center gap-2 transition-colors"
+            >
+              <Icon
+                :name="isLiked ? 'ph:heart-fill' : 'ph:heart'"
+                class="text-2xl"
+              />
+              <span class="text-sm font-semibold">{{ likeCount }}</span>
+            </button>
+
+            <button
+              class="flex items-center gap-2 text-gray-400 hover:text-blue-400 transition-colors"
+            >
+              <Icon name="ph:chat-circle" class="text-2xl" />
+              <span class="text-sm font-semibold">{{ comments.length }}</span>
+            </button>
           </div>
 
           <!-- Beat Details Table -->
@@ -452,6 +476,58 @@
               </div>
             </div>
           </div>
+
+          <!-- Comments Section -->
+          <div class="bg-[#1a1f35]/40 rounded-xl p-6 border border-gray-700/30">
+            <h3 class="text-xl font-bold text-white mb-6">Comments</h3>
+
+            <!-- Comment Form -->
+            <div class="mb-6 pb-6 border-b border-gray-700/30">
+              <textarea
+                v-model="newComment"
+                placeholder="Add a comment..."
+                class="w-full bg-[#0f1219]/50 text-white placeholder-gray-500 rounded-lg p-4 border border-gray-700/30 focus:border-blue-500 outline-none transition-colors resize-none"
+                rows="3"
+              ></textarea>
+              <button
+                @click="addComment"
+                :disabled="!newComment.trim()"
+                class="mt-3 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                Post Comment
+              </button>
+            </div>
+
+            <!-- Comments List -->
+            <div class="space-y-4">
+              <div v-for="comment in comments" :key="comment.id" class="">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="w-8 h-8 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-semibold text-white"
+                  >
+                    {{ comment.author.charAt(0) }}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-white font-semibold text-sm">
+                        {{ comment.author }}
+                      </p>
+                      <p class="text-xs text-gray-500">{{ comment.date }}</p>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                      {{ comment.text }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="comments.length === 0" class="text-center py-8">
+                <p class="text-gray-400 text-sm">
+                  No comments yet. Be the first to comment!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -490,6 +566,29 @@ const selectedLicenseLabel = computed(() =>
   getLicenseLabel(selectedLicense.value),
 );
 const usageTerms = computed(() => getUsageTerms(selectedLicense.value));
+
+// Like and comment state
+const isLiked = ref(false);
+const likeCount = ref(0);
+const newComment = ref("");
+const comments = ref([
+  {
+    id: 1,
+    author: "Sample User",
+    text: "Amazing beat! Love the vibe.",
+    date: "2 hours ago",
+  },
+  {
+    id: 2,
+    author: "Another User",
+    text: "Perfect for my project. Thanks!",
+    date: "1 day ago",
+  },
+]);
+
+const addComment = () => {
+  // TODO: implement with database integration
+};
 </script>
 
 <style scoped>
