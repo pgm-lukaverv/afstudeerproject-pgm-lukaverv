@@ -488,6 +488,9 @@ onMounted(async () => {
       // Apply default description
       description.value = trackPreferences.description || "";
 
+      // Apply default genre
+      selectedGenre.value = trackPreferences.genre || "";
+
       // Apply default pricing
       priceBasic.value = trackPreferences.priceBasic || null;
       pricePremium.value = trackPreferences.pricePremium || null;

@@ -75,6 +75,7 @@ export default defineEventHandler(async (event) => {
         data: {
           profileId: profile.id,
           description: "",
+          genre: null,
           priceBasic: 29.99,
           pricePremium: 49.99,
           priceExclusive: 199.99,

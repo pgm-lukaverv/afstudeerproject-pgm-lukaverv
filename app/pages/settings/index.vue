@@ -279,9 +279,10 @@
                 <VField
                   name="instagram"
                   type="url"
+                  rules="url"
                   :value="userProfile?.socialLinks?.instagram || ''"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-                  placeholder="instagram.com/username"
+                  placeholder="https://instagram.com/username"
                 />
                 <VErrorMessage
                   name="instagram"
@@ -297,9 +298,10 @@
                 <VField
                   name="twitter"
                   type="url"
+                  rules="url"
                   :value="userProfile?.socialLinks?.twitter || ''"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-                  placeholder="twitter.com/username"
+                  placeholder="https://twitter.com/username"
                 />
                 <VErrorMessage
                   name="twitter"
@@ -315,9 +317,10 @@
                 <VField
                   name="soundcloud"
                   type="url"
+                  rules="url"
                   :value="userProfile?.socialLinks?.soundcloud || ''"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-                  placeholder="soundcloud.com/username"
+                  placeholder="https://soundcloud.com/username"
                 />
                 <VErrorMessage
                   name="soundcloud"
@@ -333,9 +336,10 @@
                 <VField
                   name="spotify"
                   type="url"
+                  rules="url"
                   :value="userProfile?.socialLinks?.spotify || ''"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-                  placeholder="open.spotify.com/artist/..."
+                  placeholder="https://open.spotify.com/artist/..."
                 />
                 <VErrorMessage
                   name="spotify"
@@ -366,40 +370,68 @@
           </div>
 
           <!-- Success/Error Messages -->
-          <div v-if="profileError || profileSuccess">
+          <div v-if="profileError || profileSuccess" class="mb-2">
             <div
               v-if="profileError"
-              class="flex items-start gap-3 text-red-400 bg-red-900/20 border border-red-700/50 rounded-xl p-4"
+              class="flex items-start justify-between gap-3 text-red-400 bg-red-900/20 border border-red-700/50 rounded-xl p-4"
             >
-              <svg
-                class="w-5 h-5 flex-shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+              <div class="flex items-start gap-3">
+                <svg
+                  class="w-5 h-5 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <p class="font-medium">{{ profileError }}</p>
+              </div>
+              <button
+                @click="profileError = ''"
+                class="text-red-400 hover:text-red-300 flex-shrink-0 transition-colors"
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <p class="font-medium">{{ profileError }}</p>
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
             <div
               v-if="profileSuccess"
-              class="flex items-start gap-3 text-green-400 bg-green-900/20 border border-green-700/50 rounded-xl p-4"
+              class="flex items-start justify-between gap-3 text-green-400 bg-green-900/20 border border-green-700/50 rounded-xl p-4"
             >
-              <svg
-                class="w-5 h-5 flex-shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+              <div class="flex items-start gap-3">
+                <svg
+                  class="w-5 h-5 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <p class="font-medium">{{ profileSuccess }}</p>
+              </div>
+              <button
+                @click="profileSuccess = ''"
+                class="text-green-400 hover:text-green-300 flex-shrink-0 transition-colors"
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <p class="font-medium">{{ profileSuccess }}</p>
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
         </VForm>
@@ -434,6 +466,31 @@
 
           <div class="border-t border-gray-700/50"></div>
 
+          <!-- Default Genre Section -->
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-4">Default Genre</h2>
+            <p class="text-sm text-gray-400 mb-6">
+              Select your primary genre - this will be pre-selected when
+              creating new beats
+            </p>
+            <div>
+              <VField
+                v-model="preferences.genre"
+                name="genre"
+                as="select"
+                class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              >
+                <option value="">Select a genre</option>
+                <option v-for="genre in genres" :key="genre" :value="genre">
+                  {{ genre }}
+                </option>
+              </VField>
+              <VErrorMessage name="genre" class="text-red-400 text-sm mt-2" />
+            </div>
+          </div>
+
+          <div class="border-t border-gray-700/50"></div>
+
           <!-- Default Pricing Section -->
           <div>
             <h2 class="text-2xl font-bold text-white mb-4">Default Pricing</h2>
@@ -447,18 +504,23 @@
                 </label>
                 <div class="relative">
                   <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium z-10"
                     >€</span
                   >
-                  <input
+                  <VField
                     v-model.number="preferences.priceBasic"
+                    name="priceBasic"
                     type="number"
                     step="0.01"
-                    min="0"
+                    rules="required|min_value:0"
                     class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="29.99"
                   />
                 </div>
+                <VErrorMessage
+                  name="priceBasic"
+                  class="text-red-400 text-sm mt-2"
+                />
               </div>
 
               <div>
@@ -467,18 +529,23 @@
                 </label>
                 <div class="relative">
                   <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium z-10"
                     >€</span
                   >
-                  <input
+                  <VField
                     v-model.number="preferences.pricePremium"
+                    name="pricePremium"
                     type="number"
                     step="0.01"
-                    min="0"
+                    rules="required|min_value:0"
                     class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="49.99"
                   />
                 </div>
+                <VErrorMessage
+                  name="pricePremium"
+                  class="text-red-400 text-sm mt-2"
+                />
               </div>
 
               <div>
@@ -487,18 +554,23 @@
                 </label>
                 <div class="relative">
                   <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium z-10"
                     >€</span
                   >
-                  <input
+                  <VField
                     v-model.number="preferences.priceExclusive"
+                    name="priceExclusive"
                     type="number"
                     step="0.01"
-                    min="0"
+                    rules="required|min_value:0"
                     class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="199.99"
                   />
                 </div>
+                <VErrorMessage
+                  name="priceExclusive"
+                  class="text-red-400 text-sm mt-2"
+                />
               </div>
             </div>
           </div>
@@ -587,6 +659,72 @@
 
           <div class="border-t border-gray-700/50"></div>
 
+          <!-- Success/Error Messages -->
+          <div v-if="preferencesError || preferencesSuccess" class="mb-2">
+            <div
+              v-if="preferencesError"
+              class="flex items-start justify-between gap-3 text-red-400 bg-red-900/20 border border-red-700/50 rounded-xl p-4"
+            >
+              <div class="flex items-start gap-3">
+                <svg
+                  class="w-5 h-5 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <p class="font-medium">{{ preferencesError }}</p>
+              </div>
+              <button
+                @click="preferencesError = ''"
+                class="text-red-400 hover:text-red-300 flex-shrink-0 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              v-if="preferencesSuccess"
+              class="flex items-start justify-between gap-3 text-green-400 bg-green-900/20 border border-green-700/50 rounded-xl p-4"
+            >
+              <div class="flex items-start gap-3">
+                <svg
+                  class="w-5 h-5 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <p class="font-medium">{{ preferencesSuccess }}</p>
+              </div>
+              <button
+                @click="preferencesSuccess = ''"
+                class="text-green-400 hover:text-green-300 flex-shrink-0 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4">
             <button
@@ -604,44 +742,6 @@
               Reset to Defaults
             </button>
           </div>
-
-          <!-- Success/Error Messages -->
-          <div v-if="preferencesError || preferencesSuccess">
-            <div
-              v-if="preferencesError"
-              class="flex items-start gap-3 text-red-400 bg-red-900/20 border border-red-700/50 rounded-xl p-4"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <p class="font-medium">{{ preferencesError }}</p>
-            </div>
-            <div
-              v-if="preferencesSuccess"
-              class="flex items-start gap-3 text-green-400 bg-green-900/20 border border-green-700/50 rounded-xl p-4"
-            >
-              <svg
-                class="w-5 h-5 flex-shrink-0 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <p class="font-medium">{{ preferencesSuccess }}</p>
-            </div>
-          </div>
         </VForm>
       </div>
     </div>
@@ -649,6 +749,8 @@
 </template>
 
 <script setup lang="ts">
+import { genres } from "~/data/filterData";
+
 // Load Cloudinary upload widget script
 useHead({
   script: [
@@ -659,7 +761,7 @@ useHead({
   ],
 });
 
-const { signOut } = useAuth();
+const { logout } = useLogout();
 const userProfile = useState<any>("userProfile");
 
 // Tab management
@@ -682,14 +784,7 @@ const visibleTabs = computed(() => {
 });
 
 // ============ GENERAL TAB ============
-const handleLogout = async () => {
-  try {
-    await $fetch("/api/auth/logout", { method: "POST" });
-    await signOut({ callbackUrl: "/auth/login" });
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
-};
+const handleLogout = logout;
 
 // ============ EDIT PROFILE TAB ============
 const newProfilePicture = ref<string | null>(null);
@@ -781,11 +876,6 @@ const saveProfile = async (values: any) => {
     useState("username").value = updatedProfile.username;
     newProfilePicture.value = null;
     profileSuccess.value = "Profile updated successfully!";
-
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      profileSuccess.value = "";
-    }, 3000);
   } catch (err: any) {
     profileError.value = err.data?.message || "Failed to update profile";
   } finally {
@@ -802,6 +892,7 @@ const cancelProfileEdit = () => {
 // ============ TRACK PREFERENCES TAB ============
 const preferences = ref({
   description: "",
+  genre: "",
   priceBasic: 29.99,
   pricePremium: 49.99,
   priceExclusive: 199.99,
@@ -837,6 +928,7 @@ const loadTrackPreferences = async () => {
     const data = await $fetch("/api/track-preferences");
     if (data) {
       preferences.value = {
+        genre: data.genre || "",
         description: data.description || "",
         priceBasic: data.priceBasic || 29.99,
         pricePremium: data.pricePremium || 49.99,
@@ -863,11 +955,6 @@ const savePreferences = async () => {
     });
 
     preferencesSuccess.value = "Track preferences saved successfully!";
-
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      preferencesSuccess.value = "";
-    }, 3000);
   } catch (err: any) {
     preferencesError.value =
       err.data?.message || "Failed to save track preferences";
@@ -880,6 +967,7 @@ const savePreferences = async () => {
 const resetPreferences = () => {
   preferences.value = {
     description: "",
+    genre: "",
     priceBasic: 29.99,
     pricePremium: 49.99,
     priceExclusive: 199.99,

@@ -44,6 +44,7 @@ model TrackPreference {
   id             String   @id @default(cuid())
   profileId      String   @unique
   description    String?  @db.VarChar(1000) // Default description template
+  genre          String? // Default genre preference
   priceBasic     Float?   @default(29.99)
   pricePremium   Float?   @default(49.99)
   priceExclusive Float?   @default(199.99)
