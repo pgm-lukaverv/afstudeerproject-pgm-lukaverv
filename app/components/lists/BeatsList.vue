@@ -127,13 +127,18 @@
 
             <!-- Tags Column -->
             <div class="hidden md:flex flex-wrap gap-2">
-              <span
-                v-for="tag in beat.tags"
-                :key="tag"
-                class="px-2.5 py-1 text-xs font-medium bg-gray-800/50 text-gray-300 rounded-md"
+              <template v-if="beat.tags && beat.tags.length">
+                <span
+                  v-for="tag in beat.tags"
+                  :key="tag"
+                  class="px-2.5 py-1 text-xs font-medium bg-gray-800/50 text-gray-300 rounded-md"
+                >
+                  {{ tag }}
+                </span>
+              </template>
+              <span v-else class="text-xs text-gray-500 italic"
+                >No tags added.</span
               >
-                {{ tag }}
-              </span>
             </div>
 
             <!-- Action Column -->
@@ -142,13 +147,18 @@
             >
               <!-- Mobile tags -->
               <div class="md:hidden flex flex-wrap gap-1.5 flex-1">
-                <span
-                  v-for="tag in beat.tags"
-                  :key="tag"
-                  class="px-2 py-0.5 text-xs font-medium bg-gray-800/50 text-gray-300 rounded"
+                <template v-if="beat.tags && beat.tags.length">
+                  <span
+                    v-for="tag in beat.tags"
+                    :key="tag"
+                    class="px-2 py-0.5 text-xs font-medium bg-gray-800/50 text-gray-300 rounded"
+                  >
+                    {{ tag }}
+                  </span>
+                </template>
+                <span v-else class="text-xs text-gray-500 italic"
+                  >No tags added.</span
                 >
-                  {{ tag }}
-                </span>
               </div>
               <button
                 @click.stop.prevent

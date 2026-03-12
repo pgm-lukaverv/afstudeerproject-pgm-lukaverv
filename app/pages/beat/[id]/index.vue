@@ -202,7 +202,10 @@
             >
               Tags
             </h3>
-            <div class="flex flex-wrap gap-2">
+            <div
+              v-if="beat.tags && beat.tags.length"
+              class="flex flex-wrap gap-2"
+            >
               <span
                 v-for="tag in beat.tags"
                 :key="tag"
@@ -211,6 +214,7 @@
                 #{{ tag.toLowerCase() }}
               </span>
             </div>
+            <p v-else class="text-gray-500 text-sm italic">No tags added.</p>
           </div>
 
           <!-- Track Description -->
@@ -220,8 +224,11 @@
             >
               Track Description
             </h3>
-            <p class="text-gray-300 leading-relaxed">
+            <p v-if="beat.description" class="text-gray-300 leading-relaxed">
               {{ beat.description }}
+            </p>
+            <p v-else class="text-gray-500 text-sm italic">
+              No description added.
             </p>
           </div>
         </div>

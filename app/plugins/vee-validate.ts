@@ -38,4 +38,31 @@ export default defineNuxtPlugin(() => {
     }
     return true;
   });
+
+  defineRule("min_value", (value: any, [limit]: any) => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < parseFloat(limit)) {
+      return `Must be at least ${limit}`;
+    }
+    return true;
+  });
+
+  defineRule("max_value", (value: any, [limit]: any) => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num > parseFloat(limit)) {
+      return `Must not exceed ${limit}`;
+    }
+    return true;
+  });
+
+  defineRule("price", (value: any) => {
+    if (value === null || value === undefined || value === "") {
+      return "This field is required";
+    }
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0) {
+      return "Please enter a valid price (e.g. 29.99)";
+    }
+    return true;
+  });
 });
