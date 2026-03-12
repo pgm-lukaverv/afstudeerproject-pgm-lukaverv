@@ -249,8 +249,8 @@
 
         <!-- Right Content Area -->
         <div class="space-y-8">
-          <!-- Popular Tracks -->
-          <div>
+          <!-- Popular Tracks (producers only) -->
+          <div v-if="userData.role === 'PRODUCER'">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-2xl md:text-3xl font-bold text-white">
                 Popular Tracks
@@ -323,9 +323,13 @@
                     {{ track.title }}
                   </p>
                 </NuxtLink>
-                <p class="text-xs text-gray-400 truncate">
+                <NuxtLink
+                  :to="`/profile/${track.producerUserId}`"
+                  @click.stop
+                  class="text-xs text-gray-400 hover:text-blue-400 transition-colors truncate block"
+                >
                   {{ track.genre }}
-                </p>
+                </NuxtLink>
                 <p class="text-sm font-bold text-blue-400 mt-2">
                   ${{ track.priceBasic }}
                 </p>
@@ -340,40 +344,61 @@
             </p>
           </div>
 
-          <!-- Playlists -->
+          <!-- Liked Tracks -->
           <div>
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-2xl md:text-3xl font-bold text-white">
-                Playlists
+                Liked Tracks
               </h2>
-              <button
+              <NuxtLink
+                :to="`/profile/${profileId}/liked-tracks`"
                 class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-semibold text-sm md:text-base"
               >
                 See all
                 <Icon name="ph:caret-right" class="text-lg" />
-              </button>
+              </NuxtLink>
             </div>
 
-            <!-- Playlists Grid -->
+            <!-- Liked Tracks Grid -->
             <div
-              v-if="playlists.length > 0"
+              v-if="likedTracks.length > 0"
               class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
             >
               <div
-                v-for="playlist in playlists"
-                :key="playlist.id"
+                v-for="track in likedTracks"
+                :key="track.id"
                 class="group cursor-pointer"
               >
                 <div
                   class="relative aspect-square mb-3 rounded-lg overflow-hidden"
                 >
                   <img
-                    :src="playlist.coverImage"
-                    :alt="playlist.title"
+                    :src="track.coverImage"
+                    :alt="track.title"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
+                  <!-- Waveform animation when playing -->
+                  <div
+                    v-if="playingBeatId === String(track.id) && isPlaying"
+                    @click.stop="togglePlay(track)"
+                    class="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
+                  >
+                    <div class="flex items-end gap-1 h-10">
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-1"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-2"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-3"
+                      ></div>
+                    </div>
+                  </div>
                   <!-- Play Overlay -->
                   <div
+                    v-else
+                    @click.stop="togglePlay(track)"
                     class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   >
                     <div
@@ -386,19 +411,30 @@
                     </div>
                   </div>
                 </div>
-                <p class="text-sm font-semibold text-white truncate mb-1">
-                  {{ playlist.title }}
-                </p>
-                <p class="text-xs text-gray-400 truncate">
-                  {{ playlist.trackCount }} tracks
+                <NuxtLink :to="`/beat/${track.id}`">
+                  <p
+                    class="text-sm font-semibold text-white truncate mb-1 hover:text-blue-400 transition-colors"
+                  >
+                    {{ track.title }}
+                  </p>
+                </NuxtLink>
+                <NuxtLink
+                  :to="`/profile/${track.producerUserId}`"
+                  @click.stop
+                  class="text-xs text-gray-400 hover:text-blue-400 transition-colors truncate block"
+                >
+                  {{ track.producer }}
+                </NuxtLink>
+                <p class="text-sm font-bold text-blue-400 mt-2">
+                  ${{ track.priceBasic }}
                 </p>
               </div>
             </div>
             <p v-else class="text-gray-400 text-center py-8">
               {{
                 isOwnProfile
-                  ? "You haven't created any playlists yet."
-                  : "This user hasn't created any playlists yet."
+                  ? "You haven't liked any beats yet."
+                  : "This user hasn't liked any beats yet."
               }}
             </p>
           </div>
@@ -484,30 +520,46 @@ const hasSocialLinks = computed(() => {
   );
 });
 
-// Fetch beats by profile ID - skip if no userData
+// Fetch beats by profile ID - only needed for producers
 const { data: beatsData } = await useFetch(() =>
-  userData.value ? `/api/producers/${userData.value.id}/beats` : null,
+  userData.value?.role === "PRODUCER"
+    ? `/api/producers/${userData.value.id}/beats`
+    : null,
 );
 
-// Popular tracks - use first 5 beats
+// Popular tracks - use first 5 beats (producers only)
 const popularTracks = computed(() => {
   if (!beatsData.value?.beats) return [];
   return beatsData.value.beats.slice(0, 5);
 });
 
-// Sync popular tracks to audio player playlist
-usePlaylistSync(popularTracks);
+// Fetch liked tracks
+const { data: likedData } = await useFetch(() =>
+  userData.value
+    ? `/api/interactions/likes/profile/${userData.value.id}`
+    : null,
+);
 
-// Playlists - temporarily use beats (will implement playlists later)
-const playlists = computed(() => {
-  if (!beatsData.value?.beats) return [];
-  return beatsData.value.beats.slice(0, 5).map((beat) => ({
-    id: beat.id,
-    title: beat.title,
-    trackCount: 1, // TODO: Implement actual playlist track count
-    coverImage: beat.coverImage,
-  }));
+// 5 most recently liked tracks for the profile preview
+const likedTracks = computed(() => {
+  if (!likedData.value?.beats) return [];
+  return likedData.value.beats.slice(0, 5);
 });
+
+// Combine both playlists for audio player - popular tracks first (if producer), then liked tracks
+const combinedPlaylist = computed(() => {
+  const tracks = [];
+  if (userData.value?.role === "PRODUCER" && popularTracks.value.length) {
+    tracks.push(...popularTracks.value);
+  }
+  if (likedTracks.value.length) {
+    tracks.push(...likedTracks.value);
+  }
+  return tracks;
+});
+
+// Sync combined playlist to audio player
+usePlaylistSync(combinedPlaylist);
 
 // Format member since date
 const formatMemberSince = (date) => {

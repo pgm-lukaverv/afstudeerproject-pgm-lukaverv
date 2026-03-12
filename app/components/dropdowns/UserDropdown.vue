@@ -48,6 +48,16 @@
             <span>Profile</span>
           </NuxtLink>
 
+          <!-- Liked Tracks -->
+          <NuxtLink
+            :to="`/profile/${userProfile?.userId}/liked-tracks`"
+            @click="closeDropdown"
+            class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <Icon name="ph:heart" class="w-5 h-5" />
+            <span>Liked Tracks</span>
+          </NuxtLink>
+
           <!-- Settings -->
           <NuxtLink
             to="/settings"

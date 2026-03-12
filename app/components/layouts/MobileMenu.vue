@@ -111,6 +111,26 @@
         <!-- User Actions (if logged in) -->
         <div v-if="currentUser" class="space-y-2 pt-6 border-t border-gray-700">
           <NuxtLink
+            :to="`/profile/${userProfile?.userId}`"
+            @click="$emit('close')"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            active-class="bg-blue-600/10 text-blue-400"
+          >
+            <Icon name="mdi:account" class="w-5 h-5" />
+            <span class="font-medium">Profile</span>
+          </NuxtLink>
+
+          <NuxtLink
+            :to="`/profile/${userProfile?.userId}/liked-tracks`"
+            @click="$emit('close')"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            active-class="bg-blue-600/10 text-blue-400"
+          >
+            <Icon name="ph:heart" class="w-5 h-5" />
+            <span class="font-medium">Liked Tracks</span>
+          </NuxtLink>
+
+          <NuxtLink
             to="/settings"
             @click="$emit('close')"
             class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
