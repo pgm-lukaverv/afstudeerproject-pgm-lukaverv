@@ -43,11 +43,21 @@
         <div v-else-if="profileData" class="text-center">
           <!-- Profile Picture -->
           <div class="flex justify-center mb-4">
-            <img
-              :src="profileData.profilePicture"
-              :alt="profileData.username"
-              class="h-28 w-28 md:h-44 md:w-44 rounded-full object-cover border-4 border-blue-500/20 shadow-xl"
-            />
+            <div
+              class="h-28 w-28 md:h-44 md:w-44 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-4 border-blue-500/20 shadow-xl"
+            >
+              <img
+                v-if="profileData.profilePicture"
+                :src="profileData.profilePicture"
+                :alt="profileData.username"
+                class="w-full h-full object-cover"
+              />
+              <Icon
+                v-else
+                name="mdi:account-circle"
+                class="w-20 md:w-32 h-20 md:h-32 text-gray-300"
+              />
+            </div>
           </div>
 
           <!-- Username -->

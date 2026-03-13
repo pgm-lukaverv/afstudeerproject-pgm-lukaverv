@@ -78,11 +78,21 @@
         <div class="text-center mb-8">
           <!-- Profile Picture -->
           <div class="flex justify-center mb-4">
-            <img
-              :src="userData.profilePicture"
-              :alt="userData.username"
-              class="h-24 w-24 md:h-32 md:w-32 rounded-full object-cover border-4 border-blue-500/20 shadow-xl"
-            />
+            <div
+              class="h-24 w-24 md:h-32 md:w-32 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-4 border-blue-500/20 shadow-xl"
+            >
+              <img
+                v-if="userData.profilePicture"
+                :src="userData.profilePicture"
+                :alt="userData.username"
+                class="w-full h-full object-cover"
+              />
+              <Icon
+                v-else
+                name="mdi:account-circle"
+                class="w-20 md:w-28 h-20 md:h-28 text-gray-300"
+              />
+            </div>
           </div>
 
           <!-- Username -->
@@ -114,7 +124,12 @@
 
         <!-- Stats Grid -->
         <div
-          class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
+          class="grid gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
+          :class="
+            userData.role === 'PRODUCER'
+              ? 'grid-cols-2 md:grid-cols-4'
+              : 'grid-cols-2'
+          "
         >
           <!-- Followers -->
           <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
@@ -127,8 +142,11 @@
             </div>
           </div>
 
-          <!-- Plays -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
+          <!-- Plays (Producer only) -->
+          <div
+            v-if="userData.role === 'PRODUCER'"
+            class="text-center p-4 bg-[#0f1219]/50 rounded-lg"
+          >
             <Icon
               name="ph:play-circle"
               class="text-gray-400 text-2xl mx-auto mb-2"
@@ -141,8 +159,11 @@
             </div>
           </div>
 
-          <!-- Tracks -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
+          <!-- Tracks (Producer only) -->
+          <div
+            v-if="userData.role === 'PRODUCER'"
+            class="text-center p-4 bg-[#0f1219]/50 rounded-lg"
+          >
             <Icon
               name="ph:music-notes-simple"
               class="text-gray-400 text-2xl mx-auto mb-2"
