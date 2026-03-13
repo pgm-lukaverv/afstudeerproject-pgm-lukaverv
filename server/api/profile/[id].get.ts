@@ -56,8 +56,9 @@ export default defineEventHandler(async (event) => {
             : profile.socialLinks;
         formattedSocialLinks = {
           instagram: parsed.instagram || null,
+          twitter: parsed.twitter || null,
           soundcloud: parsed.soundcloud || null,
-          youtube: parsed.youtube || null,
+          spotify: parsed.spotify || null,
         };
       } catch (e) {
         formattedSocialLinks = {};

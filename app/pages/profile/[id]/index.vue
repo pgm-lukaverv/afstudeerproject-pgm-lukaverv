@@ -228,6 +228,21 @@
                 <span class="text-sm font-medium">Instagram</span>
               </a>
 
+              <!-- Twitter -->
+              <a
+                v-if="socialLinks.twitter"
+                :href="socialLinks.twitter"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 text-gray-300 hover:text-blue-400 transition-colors group"
+              >
+                <Icon
+                  name="ph:twitter-logo"
+                  class="text-xl group-hover:scale-110 transition-transform"
+                />
+                <span class="text-sm font-medium">Twitter</span>
+              </a>
+
               <!-- SoundCloud -->
               <a
                 v-if="socialLinks.soundcloud"
@@ -243,19 +258,19 @@
                 <span class="text-sm font-medium">SoundCloud</span>
               </a>
 
-              <!-- YouTube -->
+              <!-- Spotify -->
               <a
-                v-if="socialLinks.youtube"
-                :href="socialLinks.youtube"
+                v-if="socialLinks.spotify"
+                :href="socialLinks.spotify"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-300 hover:text-blue-400 transition-colors group"
               >
                 <Icon
-                  name="ph:youtube-logo"
+                  name="ph:spotify-logo"
                   class="text-xl group-hover:scale-110 transition-transform"
                 />
-                <span class="text-sm font-medium">Youtube</span>
+                <span class="text-sm font-medium">Spotify</span>
               </a>
             </div>
             <p v-else class="text-sm text-gray-300 leading-relaxed">
@@ -554,8 +569,9 @@ const socialLinks = computed(() => {
 const hasSocialLinks = computed(() => {
   return !!(
     socialLinks.value.instagram ||
+    socialLinks.value.twitter ||
     socialLinks.value.soundcloud ||
-    socialLinks.value.youtube
+    socialLinks.value.spotify
   );
 });
 
