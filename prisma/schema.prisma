@@ -157,3 +157,13 @@ enum Role {
   PRODUCER
   LISTENER
 }
+
+model BlacklistedToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([tokenHash])
+  @@index([expiresAt])
+}

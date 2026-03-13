@@ -73,8 +73,6 @@
             </div>
           </div>
 
-          <div class="border-t border-gray-700/50"></div>
-
           <!-- Privacy Section -->
           <div>
             <h2 class="text-2xl font-bold text-white mb-8">Privacy</h2>
@@ -118,33 +116,10 @@
             </div>
           </div>
 
-          <div class="border-t border-gray-700/50"></div>
-
           <!-- Danger Zone Section -->
           <div>
             <h2 class="text-2xl font-bold text-red-400 mb-8">Danger Zone</h2>
             <div class="space-y-6">
-              <!-- Deactivate Account -->
-              <div
-                class="flex items-start justify-between py-6 border-b border-gray-700/50"
-              >
-                <div class="flex-1">
-                  <h3 class="text-lg font-semibold text-white mb-1">
-                    Deactivate Account
-                  </h3>
-                  <p class="text-sm text-gray-400 max-w-lg">
-                    Temporarily disable your account. Your profile and content
-                    will be hidden but can be restored by logging back in.
-                  </p>
-                </div>
-                <button
-                  class="px-6 py-3 bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 font-semibold rounded-xl transition-all duration-200 border border-orange-600/50 whitespace-nowrap ml-4"
-                  disabled
-                >
-                  Deactivate
-                </button>
-              </div>
-
               <!-- Delete Account -->
               <div class="flex items-start justify-between py-6">
                 <div class="flex-1">
@@ -155,12 +130,19 @@
                     Permanently delete your account and all associated data.
                     This action cannot be undone.
                   </p>
+                  <p v-if="deleteMessage" class="text-sm text-green-400 mt-2">
+                    ✓ {{ deleteMessage }}
+                  </p>
+                  <p v-if="deleteError" class="text-sm text-red-400 mt-2">
+                    {{ deleteError }}
+                  </p>
                 </div>
                 <button
-                  class="px-6 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 font-semibold rounded-xl transition-all duration-200 border border-red-600/50 whitespace-nowrap ml-4"
-                  disabled
+                  @click="requestDelete"
+                  :disabled="deleteLoading"
+                  class="px-6 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 font-semibold rounded-xl transition-all duration-200 border border-red-600/50 whitespace-nowrap ml-4 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Delete
+                  {{ deleteLoading ? "Sending..." : "Delete" }}
                 </button>
               </div>
             </div>
@@ -179,25 +161,23 @@
             >
               <div class="flex-shrink-0">
                 <div class="relative group">
-                  <img
-                    v-if="newProfilePicture || userProfile?.profilePicture"
-                    :src="newProfilePicture || userProfile.profilePicture"
-                    alt="Profile Picture"
-                    class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-gray-700/50 transition-transform group-hover:scale-105"
-                  />
                   <div
-                    v-else
-                    class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center text-gray-500"
+                    class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-700 ring-4 ring-gray-700/50 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105"
                   >
-                    <svg
-                      class="w-16 h-16 md:w-20 md:h-20"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
-                      />
-                    </svg>
+                    <img
+                      v-if="
+                        (newProfilePicture || userProfile?.profilePicture) &&
+                        !wantsToRemoveProfilePicture
+                      "
+                      :src="newProfilePicture || userProfile.profilePicture"
+                      alt="Profile Picture"
+                      class="w-full h-full object-cover"
+                    />
+                    <Icon
+                      v-else
+                      name="mdi:account-circle"
+                      class="w-24 md:w-32 h-24 md:h-32 text-gray-300"
+                    />
                   </div>
                 </div>
               </div>
@@ -205,17 +185,31 @@
                 <p class="text-sm text-gray-400">
                   Recommended: Square image, minimum 400x400px
                 </p>
-                <button
-                  type="button"
-                  @click="handleUploadClick"
-                  class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
-                >
-                  {{
-                    newProfilePicture || userProfile?.profilePicture
-                      ? "Change Picture"
-                      : "Upload Picture"
-                  }}
-                </button>
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    @click="handleUploadClick"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
+                  >
+                    {{
+                      (newProfilePicture || userProfile?.profilePicture) &&
+                      !wantsToRemoveProfilePicture
+                        ? "Change Picture"
+                        : "Upload Picture"
+                    }}
+                  </button>
+                  <button
+                    v-if="
+                      (newProfilePicture || userProfile?.profilePicture) &&
+                      !wantsToRemoveProfilePicture
+                    "
+                    type="button"
+                    @click="removeProfilePicture"
+                    class="px-6 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 font-semibold rounded-xl transition-all duration-200 border border-red-600/50"
+                  >
+                    Remove Picture
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -294,7 +288,7 @@
                 as="textarea"
                 rows="6"
                 maxlength="500"
-                :value="userProfile?.bio || ''"
+                v-model="bio"
                 @input="updateBioLength"
                 class="w-full px-5 py-4 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-base leading-relaxed"
                 placeholder="Tell us about yourself, your music journey, influences..."
@@ -325,8 +319,7 @@
                 <VField
                   name="instagram"
                   type="url"
-                  rules="url"
-                  :value="userProfile?.socialLinks?.instagram || ''"
+                  v-model="instagram"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                   placeholder="https://instagram.com/username"
                 />
@@ -344,8 +337,7 @@
                 <VField
                   name="twitter"
                   type="url"
-                  rules="url"
-                  :value="userProfile?.socialLinks?.twitter || ''"
+                  v-model="twitter"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                   placeholder="https://twitter.com/username"
                 />
@@ -363,8 +355,7 @@
                 <VField
                   name="soundcloud"
                   type="url"
-                  rules="url"
-                  :value="userProfile?.socialLinks?.soundcloud || ''"
+                  v-model="soundcloud"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                   placeholder="https://soundcloud.com/username"
                 />
@@ -382,8 +373,7 @@
                 <VField
                   name="spotify"
                   type="url"
-                  rules="url"
-                  :value="userProfile?.socialLinks?.spotify || ''"
+                  v-model="spotify"
                   class="w-full px-5 py-3.5 bg-[#0d1230] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                   placeholder="https://open.spotify.com/artist/..."
                 />
@@ -797,6 +787,11 @@
 <script setup lang="ts">
 import { genres } from "~/data/filterData";
 
+// Require authentication
+definePageMeta({
+  middleware: "auth",
+});
+
 // Load Cloudinary upload widget script
 useHead({
   script: [
@@ -838,6 +833,26 @@ const likedTracksPublic = ref<boolean>(
 );
 const privacySaved = ref(false);
 
+// Delete account
+const deleteLoading = ref(false);
+const deleteMessage = ref("");
+const deleteError = ref("");
+
+const requestDelete = async () => {
+  deleteMessage.value = "";
+  deleteError.value = "";
+  deleteLoading.value = true;
+  try {
+    await $fetch("/api/auth/request-delete", { method: "POST" });
+    deleteMessage.value = "Check your email for a confirmation link.";
+  } catch (err: any) {
+    deleteError.value =
+      err?.data?.message ?? "Failed to send confirmation email.";
+  } finally {
+    deleteLoading.value = false;
+  }
+};
+
 const savePrivacySettings = async () => {
   try {
     await $fetch(`/api/profile/${userProfile.value?.userId}`, {
@@ -863,12 +878,25 @@ const profileLoading = ref(false);
 const profileError = ref("");
 const profileSuccess = ref("");
 const bioLength = ref(0);
+const wantsToRemoveProfilePicture = ref(false);
+
+// Form fields refs
+const bio = ref("");
+const instagram = ref("");
+const twitter = ref("");
+const soundcloud = ref("");
+const spotify = ref("");
 
 const { openUploadWidget } = useCloudinaryUpload();
 
 // Initialize bio length on mount
 onMounted(() => {
   bioLength.value = userProfile.value?.bio?.length || 0;
+  bio.value = userProfile.value?.bio || "";
+  instagram.value = userProfile.value?.socialLinks?.instagram || "";
+  twitter.value = userProfile.value?.socialLinks?.twitter || "";
+  soundcloud.value = userProfile.value?.socialLinks?.soundcloud || "";
+  spotify.value = userProfile.value?.socialLinks?.spotify || "";
 
   // Load track preferences if producer
   if (userProfile.value?.role === "PRODUCER") {
@@ -887,6 +915,7 @@ const handleUploadClick = () => {
   openUploadWidget(
     (url: string) => {
       newProfilePicture.value = url;
+      wantsToRemoveProfilePicture.value = false;
     },
     {
       folder: "beatstack-profile-pictures",
@@ -896,6 +925,12 @@ const handleUploadClick = () => {
   );
 };
 
+// Function to remove profile picture
+const removeProfilePicture = () => {
+  newProfilePicture.value = null;
+  wantsToRemoveProfilePicture.value = true;
+};
+
 // Function to save profile changes
 const saveProfile = async (values: any) => {
   profileLoading.value = true;
@@ -903,36 +938,21 @@ const saveProfile = async (values: any) => {
   profileSuccess.value = "";
 
   try {
-    const updateData: any = {};
-
-    if (values.username !== userProfile.value?.username) {
-      updateData.username = values.username;
-    }
-
-    if (values.bio !== userProfile.value?.bio) {
-      updateData.bio = values.bio || "";
-    }
-
-    if (newProfilePicture.value) {
-      updateData.profilePicture = newProfilePicture.value;
-    }
-
-    const socialLinks = {
-      instagram: values.instagram || "",
-      twitter: values.twitter || "",
-      soundcloud: values.soundcloud || "",
-      spotify: values.spotify || "",
+    const updateData: any = {
+      username: values.username,
+      bio: bio.value || "",
+      socialLinks: {
+        instagram: instagram.value || "",
+        twitter: twitter.value || "",
+        soundcloud: soundcloud.value || "",
+        spotify: spotify.value || "",
+      },
     };
 
-    const currentSocials = userProfile.value?.socialLinks || {};
-    const socialsChanged =
-      socialLinks.instagram !== (currentSocials.instagram || "") ||
-      socialLinks.twitter !== (currentSocials.twitter || "") ||
-      socialLinks.soundcloud !== (currentSocials.soundcloud || "") ||
-      socialLinks.spotify !== (currentSocials.spotify || "");
-
-    if (socialsChanged) {
-      updateData.socialLinks = socialLinks;
+    if (wantsToRemoveProfilePicture.value) {
+      updateData.profilePicture = null;
+    } else if (newProfilePicture.value) {
+      updateData.profilePicture = newProfilePicture.value;
     }
 
     const updatedProfile = (await $fetch(
@@ -945,7 +965,14 @@ const saveProfile = async (values: any) => {
 
     userProfile.value = updatedProfile;
     useState("username").value = updatedProfile.username;
+    bio.value = updatedProfile.bio || "";
+    instagram.value = updatedProfile.socialLinks?.instagram || "";
+    twitter.value = updatedProfile.socialLinks?.twitter || "";
+    soundcloud.value = updatedProfile.socialLinks?.soundcloud || "";
+    spotify.value = updatedProfile.socialLinks?.spotify || "";
+    bioLength.value = updatedProfile.bio?.length || 0;
     newProfilePicture.value = null;
+    wantsToRemoveProfilePicture.value = false;
     profileSuccess.value = "Profile updated successfully!";
   } catch (err: any) {
     profileError.value = err.data?.message || "Failed to update profile";
@@ -956,6 +983,12 @@ const saveProfile = async (values: any) => {
 
 const cancelProfileEdit = () => {
   newProfilePicture.value = null;
+  wantsToRemoveProfilePicture.value = false;
+  bio.value = userProfile.value?.bio || "";
+  instagram.value = userProfile.value?.socialLinks?.instagram || "";
+  twitter.value = userProfile.value?.socialLinks?.twitter || "";
+  soundcloud.value = userProfile.value?.socialLinks?.soundcloud || "";
+  spotify.value = userProfile.value?.socialLinks?.spotify || "";
   profileError.value = "";
   profileSuccess.value = "";
 };
