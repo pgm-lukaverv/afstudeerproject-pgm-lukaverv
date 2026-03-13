@@ -518,6 +518,10 @@ const {
   removeTag,
 } = useBeatForm(beatCoverUrl, wavUrl, mp3Url, tags, tagInput, audioDuration);
 
+// Published modal state (global so it persists across navigation)
+const showPublishedModal = useState("showBeatPublishedModal", () => false);
+const publishedBeat = useState<any>("publishedBeatData", () => ({}));
+
 async function handleSubmit() {
   submitAttempted.value = true;
   serverError.value = "";
@@ -536,7 +540,7 @@ async function handleSubmit() {
       return;
     }
 
-    await $fetch("/api/beats/create", {
+    const response = await $fetch("/api/beats/create", {
       method: "POST",
       body: {
         title: title.value,
@@ -556,7 +560,26 @@ async function handleSubmit() {
       },
     });
 
-    navigateTo("/discover");
+    // Store beat data in global state and show modal
+    publishedBeat.value = {
+      id: response?.id,
+      title: title.value,
+      description: description.value || undefined,
+      coverImage: beatCoverUrl.value,
+      genre: selectedGenre.value,
+      bpm: bpm.value,
+      key: selectedKey.value || undefined,
+      duration: audioDuration.value || undefined,
+      priceBasic: priceBasic.value,
+      pricePremium: pricePremium.value,
+      priceExclusive: priceExclusive.value,
+      tags: [...tags.value],
+      isPublished: isPublished.value,
+    };
+    showPublishedModal.value = true;
+
+    // Redirect to dashboard while keeping modal visible
+    navigateTo("/dashboard");
   } catch (error: any) {
     console.error("Failed to create beat:", error);
     serverError.value =
