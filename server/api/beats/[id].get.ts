@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
           select: {
             likes: true,
             comments: true,
+            plays: true,
           },
         },
       },
@@ -64,6 +65,7 @@ export default defineEventHandler(async (event) => {
       isExclusiveSold: beat.isExclusiveSold,
       likesCount: beat._count.likes,
       commentsCount: beat._count.comments,
+      playsCount: beat._count.plays,
     };
   } catch (error) {
     console.error("Error fetching beat:", error);
