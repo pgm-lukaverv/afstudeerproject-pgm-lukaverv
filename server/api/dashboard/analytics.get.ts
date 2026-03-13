@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
 
     const profileId = profile.id;
 
-    // Get top 4 tracks by play count (for this producer)
+    // Get top 5 tracks by play count (for this producer) - all time
     const topTracks = await prisma.beat.findMany({
       where: {
         producerId: profileId,
@@ -70,10 +70,10 @@ export default defineEventHandler(async (event) => {
           _count: "desc",
         },
       },
-      take: 4,
+      take: 5,
     });
 
-    // Get top 4 fans (users who played this producer's tracks the most)
+    // Get top 5 fans (users who played this producer's tracks the most) - all time
     const topFans = await prisma.play.groupBy({
       by: ["profileId"],
       where: {
@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
           id: "desc",
         },
       },
-      take: 4,
+      take: 5,
     });
 
     // Fetch profile details for top fans

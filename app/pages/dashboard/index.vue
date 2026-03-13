@@ -110,9 +110,6 @@
                   <h2 class="text-2xl font-bold text-white">Top Tracks</h2>
                   <p class="text-sm text-gray-400 mt-1">This Week</p>
                 </div>
-                <div class="bg-primary-500/10 px-4 py-2 rounded-lg">
-                  <p class="text-primary-400 font-bold text-sm">Top 4</p>
-                </div>
               </div>
 
               <div class="space-y-3">
@@ -189,9 +186,6 @@
                 <div>
                   <h2 class="text-2xl font-bold text-white">Top Fans</h2>
                   <p class="text-sm text-gray-400 mt-1">This Week</p>
-                </div>
-                <div class="bg-primary-500/10 px-4 py-2 rounded-lg">
-                  <p class="text-primary-400 font-bold text-sm">Top 4</p>
                 </div>
               </div>
 

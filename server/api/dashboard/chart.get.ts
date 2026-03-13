@@ -61,17 +61,39 @@ function buildConfig(period: Period) {
   }
 
   if (period === "month") {
-    const buckets = ["week-4", "week-3", "week-2", "week-1"];
+    // Current month's calendar weeks
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Determine how many weeks are in this month
+    const firstDayOfWeek = firstDay.getDay(); // 0 = Sunday
+    const daysInMonth = lastDay.getDate();
+    const totalDays = firstDayOfWeek + daysInMonth;
+    const weeksCount = Math.ceil(totalDays / 7);
+
+    const buckets = Array.from(
+      { length: weeksCount },
+      (_, i) => `week-${i + 1}`,
+    );
+    const labels = Array.from(
+      { length: weeksCount },
+      (_, i) => `Week ${i + 1}`,
+    );
+
     return {
-      startDate: daysAgo(27),
+      startDate: firstDay,
       buckets,
-      labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+      labels,
       getKey: (d: Date) => {
-        const diff = Math.floor((now.getTime() - d.getTime()) / DAY_MS);
-        if (diff < 7) return "week-1";
-        if (diff < 14) return "week-2";
-        if (diff < 21) return "week-3";
-        return "week-4";
+        // Only count dates within the current month
+        if (d.getFullYear() !== year || d.getMonth() !== month) {
+          return ""; // Skip dates outside current month
+        }
+        const dayOfMonth = d.getDate();
+        const weekNumber = Math.ceil((dayOfMonth + firstDayOfWeek) / 7);
+        return `week-${weekNumber}`;
       },
     };
   }
