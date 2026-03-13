@@ -1,198 +1,130 @@
 import jwt from "jsonwebtoken";
 import { getToken } from "#auth";
 
-export default defineEventHandler(async (event) => {
-  try {
-    let userId: string | null = null;
+type Period = "week" | "month" | "year" | "all";
 
-    // Try OAuth session first
-    const token = await getToken({ event });
-    if (token?.email) {
-      const oauthUser = await prisma.user.findUnique({
-        where: { email: token.email as string },
-        select: { id: true },
-      });
-      if (oauthUser) {
-        userId = oauthUser.id;
-      }
-    }
+function getStartDate(period: Period): Date | undefined {
+  if (period === "all") return undefined;
+  const now = new Date();
+  const d = now.getDay();
+  const starts: Record<Exclude<Period, "all">, Date> = {
+    week: new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - (d === 0 ? 6 : d - 1),
+    ),
+    month: new Date(now.getFullYear(), now.getMonth(), 1),
+    year: new Date(now.getFullYear(), 0, 1),
+  };
+  return starts[period];
+}
 
-    // Fallback to JWT token
-    if (!userId) {
-      const authToken = getCookie(event, "auth_token");
-      if (authToken) {
-        try {
-          const decoded = jwt.verify(
-            authToken,
-            process.env.JWT_SECRET || "your-secret-key",
-          ) as { id: string };
-          userId = decoded.id;
-        } catch (error) {
-          // Invalid token
-        }
-      }
-    }
-
-    if (!userId) {
-      throw createError({
-        statusCode: 401,
-        message: "Unauthorized",
-      });
-    }
-
-    // Get profile from userId
-    const profile = await prisma.profile.findUnique({
-      where: { userId },
+async function getUserId(event: any): Promise<string | null> {
+  // Try OAuth session first
+  const token = await getToken({ event });
+  if (token?.email) {
+    const user = await prisma.user.findUnique({
+      where: { email: token.email as string },
       select: { id: true },
     });
+    if (user) return user.id;
+  }
 
-    if (!profile) {
-      throw createError({
-        statusCode: 404,
-        message: "Profile not found",
-      });
-    }
+  // Fallback to JWT cookie
+  const authToken = getCookie(event, "auth_token");
+  if (authToken) {
+    try {
+      const decoded = jwt.verify(
+        authToken,
+        process.env.JWT_SECRET || "your-secret-key",
+      ) as { id: string };
+      return decoded.id;
+    } catch {}
+  }
 
-    const profileId = profile.id;
+  return null;
+}
 
-    // Get top 5 tracks by play count (for this producer) - all time
-    const topTracks = await prisma.beat.findMany({
-      where: {
-        producerId: profileId,
-      },
+export default defineEventHandler(async (event) => {
+  const period = (getQuery(event).period as Period) || "all";
+  const startDate = getStartDate(period);
+  const dateFilter = startDate ? { gte: startDate } : undefined;
+
+  const userId = await getUserId(event);
+  if (!userId) throw createError({ statusCode: 401, message: "Unauthorized" });
+
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!profile)
+    throw createError({ statusCode: 404, message: "Profile not found" });
+
+  const { id: profileId } = profile;
+
+  const [beatsWithPlays, topFans] = await Promise.all([
+    // All beats with play/like/comment counts filtered by period
+    prisma.beat.findMany({
+      where: { producerId: profileId },
       include: {
         _count: {
-          select: { plays: true, likes: true, comments: true },
+          select: {
+            plays: dateFilter ? { where: { createdAt: dateFilter } } : true,
+            likes: dateFilter ? { where: { createdAt: dateFilter } } : true,
+            comments: dateFilter ? { where: { createdAt: dateFilter } } : true,
+          },
         },
       },
-      orderBy: {
-        plays: {
-          _count: "desc",
-        },
-      },
-      take: 5,
-    });
+    }),
 
-    // Get top 5 fans (users who played this producer's tracks the most) - all time
-    const topFans = await prisma.play.groupBy({
+    // Top 5 fans by play count within period
+    prisma.play.groupBy({
       by: ["profileId"],
       where: {
-        beat: {
-          producerId: profileId,
-        },
-        profileId: {
-          not: null, // Only count logged-in users
-        },
+        beat: { producerId: profileId },
+        profileId: { not: null },
+        ...(dateFilter && { createdAt: dateFilter }),
       },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: "desc",
-        },
-      },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
       take: 5,
-    });
+    }),
+  ]);
 
-    // Fetch profile details for top fans
-    const fanProfileIds = topFans
-      .map((f: any) => f.profileId)
-      .filter((id: any): id is string => id !== null);
+  // Sort beats by play count, take top 5
+  const topTracks = beatsWithPlays
+    .sort((a, b) => b._count.plays - a._count.plays)
+    .slice(0, 5);
 
-    const fanProfiles = await prisma.profile.findMany({
-      where: {
-        id: {
-          in: fanProfileIds,
-        },
-      },
-      select: {
-        id: true,
-        userId: true,
-        username: true,
-        profilePicture: true,
-      },
-    });
+  // Hydrate fan entries with profile data
+  const fanProfileIds = topFans
+    .map((f) => f.profileId)
+    .filter(Boolean) as string[];
+  const fanProfiles = await prisma.profile.findMany({
+    where: { id: { in: fanProfileIds } },
+    select: { id: true, userId: true, username: true, profilePicture: true },
+  });
 
-    // Map fan data with profile info
-    const topFansWithProfiles = topFans.map((fan: any) => {
-      const profile = fanProfiles.find((p: any) => p.id === fan.profileId);
+  const fanMap = new Map(fanProfiles.map((p) => [p.id, p]));
+
+  return {
+    topTracks: topTracks.map((beat) => ({
+      id: beat.id,
+      title: beat.title,
+      plays: beat._count.plays,
+      likes: beat._count.likes,
+      comments: beat._count.comments,
+      bpm: beat.bpm,
+      image: beat.coverImage,
+    })),
+    topFans: topFans.map((fan) => {
+      const p = fanMap.get(fan.profileId!);
       return {
-        username: profile?.username || "Unknown User",
-        userId: profile?.userId || null,
-        profilePicture: profile?.profilePicture || null,
+        username: p?.username ?? "Unknown User",
+        userId: p?.userId ?? null,
+        profilePicture: p?.profilePicture ?? null,
         plays: fan._count.id,
       };
-    });
-
-    // Get weekly play data (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const weeklyPlays = await prisma.play.groupBy({
-      by: ["createdAt"],
-      where: {
-        beat: {
-          producerId: profileId,
-        },
-        createdAt: {
-          gte: sevenDaysAgo,
-        },
-      },
-      _count: {
-        id: true,
-      },
-    });
-
-    // Group by day for chart data
-    const playsByDay: Record<string, number> = {};
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dayKey = date.toISOString().split("T")[0];
-      if (dayKey) {
-        playsByDay[dayKey] = 0;
-      }
-    }
-
-    weeklyPlays.forEach((play: any) => {
-      const dayKey = play.createdAt.toISOString().split("T")[0];
-      if (dayKey && playsByDay[dayKey] !== undefined) {
-        playsByDay[dayKey]++;
-      }
-    });
-
-    // Convert to array format for chart
-    const chartData = Object.entries(playsByDay)
-      .map(([date, count]) => ({
-        date,
-        plays: count,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    return {
-      topTracks: topTracks.map((beat: any) => ({
-        id: beat.id,
-        title: beat.title,
-        plays: beat._count.plays,
-        likes: beat._count.likes,
-        comments: beat._count.comments,
-        bpm: beat.bpm,
-        image: beat.coverImage,
-      })),
-      topFans: topFansWithProfiles,
-      weeklyPlays: chartData,
-      totalPlays: weeklyPlays.reduce(
-        (sum: number, play: any) => sum + play._count.id,
-        0,
-      ),
-    };
-  } catch (error) {
-    console.error("Error fetching analytics:", error);
-    throw createError({
-      statusCode: 500,
-      message: "Failed to fetch analytics",
-    });
-  }
+    }),
+  };
 });

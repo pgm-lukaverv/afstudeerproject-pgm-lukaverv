@@ -20,19 +20,7 @@
             to="/beat/create"
             class="hidden md:flex px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium items-center gap-2"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
+            <Icon name="ph:plus" class="w-5 h-5" />
             Create Beat
           </NuxtLink>
         </div>
@@ -42,19 +30,7 @@
           to="/beat/create"
           class="md:hidden mt-6 flex w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium items-center justify-center gap-2"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
+          <Icon name="ph:plus" class="w-5 h-5" />
           Create Beat
         </NuxtLink>
       </div>
@@ -108,8 +84,11 @@
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-2xl font-bold text-white">Top Tracks</h2>
-                  <p class="text-sm text-gray-400 mt-1">This Week</p>
+                  <p class="text-sm text-gray-400 mt-1">
+                    {{ analyticsPeriodLabel }}
+                  </p>
                 </div>
+                <PeriodFilter v-model="analyticsPeriod" />
               </div>
 
               <div class="space-y-3">
@@ -185,8 +164,11 @@
               <div class="flex items-center justify-between mb-6">
                 <div>
                   <h2 class="text-2xl font-bold text-white">Top Fans</h2>
-                  <p class="text-sm text-gray-400 mt-1">This Week</p>
+                  <p class="text-sm text-gray-400 mt-1">
+                    {{ analyticsPeriodLabel }}
+                  </p>
                 </div>
+                <PeriodFilter v-model="analyticsPeriod" />
               </div>
 
               <div class="space-y-3">
@@ -286,22 +268,39 @@ const tabs = [
   { id: "tracks", label: "Tracks" },
 ];
 
-// Fetch producer's beats dynamically
+// Tracks tab sort
+const beatSort = ref("newest");
+
+// Fetch producer's beats
 const { data: userBeats, pending } = await useFetch("/api/beats/user", {
   headers: useRequestHeaders(["cookie"]),
 });
 
-// Fetch analytics data dynamically
-const { data: analytics } = await useFetch("/api/dashboard/analytics/", {
-  headers: useRequestHeaders(["cookie"]),
+// Analytics period filter
+const analyticsPeriod = ref("all");
+
+const analyticsPeriodLabel = computed(() => {
+  const labels: Record<string, string> = {
+    week: "This Week",
+    month: "This Month",
+    year: "This Year",
+    all: "All Time",
+  };
+  return labels[analyticsPeriod.value] || "All Time";
 });
+
+// Fetch analytics data dynamically with period filter
+const { data: analytics } = await useFetch(
+  () => `/api/dashboard/analytics?period=${analyticsPeriod.value}`,
+  {
+    headers: useRequestHeaders(["cookie"]),
+  },
+);
 
 // Use dynamic data from API or fall back to empty arrays
 const topTracks = computed(() => (analytics.value?.topTracks || []) as any[]);
 const topFans = computed(() => (analytics.value?.topFans || []) as any[]);
 
-// Tracks tab sort
-const beatSort = ref("newest");
 watch(beatSort, () => {
   currentPage.value = 1;
 });
