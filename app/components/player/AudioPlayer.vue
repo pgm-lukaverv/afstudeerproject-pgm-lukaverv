@@ -315,6 +315,7 @@ const waveformRef = ref<HTMLElement | null>(null);
 const mobileWaveformRef = ref<HTMLElement | null>(null);
 const isLoading = ref(false);
 const showMobileVolume = ref(false);
+const playRegistered = ref(false); // Track if play was registered for current track
 let rafId: number | null = null;
 let soundId: number | null = null;
 
@@ -365,6 +366,7 @@ watch(
       return;
     }
     trackJustLoaded = true;
+    playRegistered.value = false; // Reset play registration for new track
     loadTrack(track);
 
     // Fetch like status for the new track
@@ -446,10 +448,33 @@ function tick() {
   if (rafId !== null) cancelAnimationFrame(rafId);
   if (!sound.value) return;
   currentTime.value = (sound.value.seek(soundId ?? undefined) as number) ?? 0;
+
+  // Register play after 30 seconds of continuous playback
+  if (
+    !playRegistered.value &&
+    currentTime.value >= 30 &&
+    audioStore.currentTrack
+  ) {
+    playRegistered.value = true;
+    registerPlay(audioStore.currentTrack.id);
+  }
+
   if (audioStore.isPlaying) {
     rafId = requestAnimationFrame(tick);
   } else {
     rafId = null;
+  }
+}
+
+async function registerPlay(beatId: string) {
+  try {
+    await $fetch("/api/interactions/plays/plays", {
+      method: "POST",
+      body: { beatId },
+    });
+  } catch (error) {
+    // Silently fail - don't interrupt user experience
+    console.error("Failed to register play:", error);
   }
 }
 

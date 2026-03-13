@@ -144,6 +144,13 @@
                 comments?.length ?? beat?.commentsCount ?? 0
               }}</span>
             </button>
+
+            <div class="flex items-center gap-2 text-gray-400">
+              <Icon name="ph:play-fill" class="text-2xl" />
+              <span class="text-sm font-semibold">{{
+                formatNumber(beat?.playsCount ?? 0)
+              }}</span>
+            </div>
           </div>
 
           <!-- Beat Details Table -->
