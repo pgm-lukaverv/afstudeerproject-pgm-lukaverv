@@ -316,8 +316,13 @@ const mobileWaveformRef = ref<HTMLElement | null>(null);
 const isLoading = ref(false);
 const showMobileVolume = ref(false);
 const playRegistered = ref(false); // Track if play was registered for current track
+const currentPlayId = ref<string | null>(null);
 let rafId: number | null = null;
 let soundId: number | null = null;
+
+// Real accumulated listen time tracking (prevents gaming via seeking)
+let accumulatedListenTime = 0;
+let lastTickTime = 0;
 
 // Likes state — shared reactive store across AudioPlayer and beat detail page
 const userProfile = useState<any>("userProfile");
@@ -359,6 +364,9 @@ let trackJustLoaded = false;
 watch(
   () => audioStore.currentTrack,
   async (track: Track | null) => {
+    // Send duration for the previous track before switching
+    sendListenDuration();
+
     if (!track) {
       sound.value?.unload();
       sound.value = null;
@@ -399,6 +407,10 @@ async function loadTrack(track: Track) {
     soundId = null;
     currentTime.value = 0;
     actualDuration.value = 0;
+    // Reset for new track
+    accumulatedListenTime = 0;
+    lastTickTime = 0;
+    currentPlayId.value = null; // Clear play ID when switching beats
 
     // Generate waveform using composable
     waveformHeights.value = await generateWaveform(track.audioUrl);
@@ -417,10 +429,17 @@ async function loadTrack(track: Track) {
         soundId = id;
         trackJustLoaded = false; // Reset here, after sound is actually playing
         audioStore.setIsPlaying(true);
+        // Register play immediately (5min cooldown enforced by API)
+        if (!playRegistered.value && audioStore.currentTrack) {
+          playRegistered.value = true;
+          registerPlay(audioStore.currentTrack.id);
+        }
         tick();
       },
       onpause() {
         audioStore.setIsPlaying(false);
+        // Reset timestamp so pause time isn't included in duration
+        lastTickTime = 0;
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
           rafId = null;
@@ -428,6 +447,7 @@ async function loadTrack(track: Track) {
       },
       onend() {
         audioStore.setIsPlaying(false);
+        sendListenDuration();
         currentTime.value = 0;
         // Auto-play next track
         if (hasNext.value) {
@@ -447,16 +467,17 @@ async function loadTrack(track: Track) {
 function tick() {
   if (rafId !== null) cancelAnimationFrame(rafId);
   if (!sound.value) return;
+
   currentTime.value = (sound.value.seek(soundId ?? undefined) as number) ?? 0;
 
-  // Register play after 30 seconds of continuous playback
-  if (
-    !playRegistered.value &&
-    currentTime.value >= 30 &&
-    audioStore.currentTrack
-  ) {
-    playRegistered.value = true;
-    registerPlay(audioStore.currentTrack.id);
+  // Track real accumulated listening time (only when actually playing)
+  if (audioStore.isPlaying) {
+    const now = Date.now();
+    if (lastTickTime > 0) {
+      const elapsed = (now - lastTickTime) / 1000; // convert ms to seconds
+      accumulatedListenTime += elapsed;
+    }
+    lastTickTime = now;
   }
 
   if (audioStore.isPlaying) {
@@ -468,13 +489,32 @@ function tick() {
 
 async function registerPlay(beatId: string) {
   try {
-    await $fetch("/api/interactions/plays/plays", {
-      method: "POST",
-      body: { beatId },
-    });
+    const res = await $fetch<{ playId: string }>(
+      "/api/interactions/plays/plays",
+      {
+        method: "POST",
+        body: { beatId },
+      },
+    );
+    currentPlayId.value = res.playId;
   } catch (error) {
     // Silently fail - don't interrupt user experience
     console.error("Failed to register play:", error);
+  }
+}
+
+async function sendListenDuration() {
+  if (!currentPlayId.value || accumulatedListenTime <= 0) return;
+  const playId = currentPlayId.value;
+  const duration = Math.floor(accumulatedListenTime);
+  // Keep currentPlayId - allows updating same play if user replays within cooldown
+  try {
+    await $fetch(`/api/interactions/plays/${playId}`, {
+      method: "PATCH",
+      body: { listenDuration: duration },
+    });
+  } catch {
+    // Silently fail
   }
 }
 
@@ -494,6 +534,9 @@ function seek(e: MouseEvent) {
 
   sound.value.seek(time, soundId ?? undefined);
   currentTime.value = time; // Immediately update for visual feedback
+  // Reset accumulated time when user seeks (prevents gaming)
+  accumulatedListenTime = 0;
+  lastTickTime = 0;
   // Always restart tick loop so waveform + timer continue updating
   tick();
 }
@@ -524,6 +567,9 @@ function seekMobile(e: MouseEvent) {
   const time = percentage * duration;
   sound.value.seek(time, soundId ?? undefined);
   currentTime.value = time;
+  // Reset accumulated time when user seeks (prevents gaming)
+  accumulatedListenTime = 0;
+  lastTickTime = 0;
   tick();
 }
 
@@ -539,6 +585,9 @@ function onTouchSeek(e: TouchEvent) {
   const time = percentage * duration;
   sound.value.seek(time, soundId ?? undefined);
   currentTime.value = time;
+  // Reset accumulated time when user seeks (prevents gaming)
+  accumulatedListenTime = 0;
+  lastTickTime = 0;
   tick();
 }
 
@@ -610,6 +659,7 @@ function toggleMute() {
 }
 
 function closePlayer() {
+  sendListenDuration();
   sound.value?.stop();
   sound.value?.unload();
   audioStore.stop();
@@ -623,6 +673,7 @@ function formatTime(s: number): string {
 }
 
 onUnmounted(() => {
+  sendListenDuration();
   if (rafId !== null) cancelAnimationFrame(rafId);
   sound.value?.unload();
 });

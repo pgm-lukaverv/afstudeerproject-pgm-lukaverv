@@ -160,8 +160,10 @@
       >
         <RetentionGraph
           :duration="beat?.durationSeconds ?? 180"
-          :avg-view-duration="avgViewDuration"
-          :avg-percentage-viewed="avgPercentageViewed"
+          :avg-view-duration="retention?.avgViewDuration ?? '0:00'"
+          :avg-percentage-viewed="retention?.avgPercentageViewed ?? 0"
+          :beat-retention="retention?.beatRetention ?? []"
+          :typical-retention="retention?.typicalRetention ?? []"
         />
       </div>
 
@@ -469,9 +471,11 @@ const stats = computed(() => ({
 
 const { formatNumber, formatDate } = useFormatters();
 
-// Retention graph data (also hardcoded for now)
-const avgViewDuration = "1:45";
-const avgPercentageViewed = 58;
+// Retention graph data
+const { data: retention } = await useFetch(
+  `/api/dashboard/retention/${beatId}`,
+  { headers: useRequestHeaders(["cookie"]) },
+);
 
 const userProfile = useState<any>("userProfile");
 

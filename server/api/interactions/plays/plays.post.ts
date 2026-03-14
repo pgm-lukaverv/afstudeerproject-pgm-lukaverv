@@ -79,10 +79,11 @@ export default defineEventHandler(async (event) => {
       });
 
       if (recentPlay) {
-        throw createError({
-          statusCode: 429,
-          message: "Play already registered recently",
-        });
+        // Return existing play ID instead of error - allows continued duration tracking
+        return {
+          success: true,
+          playId: recentPlay.id,
+        };
       }
     }
     // Note: For anonymous users, we don't enforce cooldown since we can't track them
@@ -98,7 +99,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      play,
+      playId: play.id,
     };
   } catch (error: any) {
     console.error("Error registering play:", error);

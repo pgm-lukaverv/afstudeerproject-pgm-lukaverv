@@ -140,10 +140,11 @@ model Follow {
 }
 
 model Play {
-  id        String   @id @default(cuid())
-  profileId String? // Nullable for guest/anonymous plays
-  beatId    String
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  profileId      String? // Nullable for guest/anonymous plays
+  beatId         String
+  listenDuration Int? // Seconds the user actually listened
+  createdAt      DateTime @default(now())
 
   profile Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
   beat    Beat     @relation(fields: [beatId], references: [id], onDelete: Cascade)
