@@ -1,3 +1,5 @@
+import { formatDuration } from "~~/server/utils/formatters";
+
 export default defineEventHandler(async (event) => {
   try {
     const id = getRouterParam(event, "id");
@@ -46,6 +48,12 @@ export default defineEventHandler(async (event) => {
             username: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -54,9 +62,7 @@ export default defineEventHandler(async (event) => {
 
     // Format beats for frontend
     const formattedBeats = beats.map((beat) => {
-      const minutes = Math.floor(beat.duration / 60);
-      const seconds = beat.duration % 60;
-      const formattedDuration = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      const formattedDuration = formatDuration(beat.duration);
 
       return {
         id: beat.id,
@@ -76,6 +82,8 @@ export default defineEventHandler(async (event) => {
         durationSeconds: beat.duration,
         coverImage: beat.coverImage,
         audioUrl: beat.audioFile,
+        likesCount: beat._count.likes,
+        commentsCount: beat._count.comments,
       };
     });
 

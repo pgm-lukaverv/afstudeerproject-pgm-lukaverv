@@ -48,6 +48,16 @@
             <span>Profile</span>
           </NuxtLink>
 
+          <!-- Liked Tracks -->
+          <NuxtLink
+            :to="`/profile/${userProfile?.userId}/liked-tracks`"
+            @click="closeDropdown"
+            class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <Icon name="ph:heart" class="w-5 h-5" />
+            <span>Liked Tracks</span>
+          </NuxtLink>
+
           <!-- Settings -->
           <NuxtLink
             to="/settings"
@@ -95,8 +105,6 @@ const props = defineProps({
   },
 });
 
-const { signOut } = useAuth();
-
 // Dropdown state
 const isDropdownOpen = ref(false);
 const dropdownRef = ref(null);
@@ -107,6 +115,8 @@ const toggleDropdown = () => {
 };
 
 // Close dropdown menu
+const { logout } = useLogout();
+
 const closeDropdown = () => {
   isDropdownOpen.value = false;
 };
@@ -114,18 +124,7 @@ const closeDropdown = () => {
 // Handle logout
 const handleLogout = async () => {
   closeDropdown();
-  // Clear JWT cookie (manual login) and OAuth session
-  await $fetch("/api/auth/logout", { method: "POST" });
-  await signOut({ callbackUrl: "/auth/login" });
-
-  // Clear cached user data
-  const userProfile = useState("userProfile");
-  const username = useState("username");
-  const loading = useState("navbarLoading");
-
-  userProfile.value = null;
-  username.value = "User";
-  loading.value = true;
+  await logout();
 };
 
 // Close dropdown when clicking outside

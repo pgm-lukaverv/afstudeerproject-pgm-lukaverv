@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit">
+      <VForm @submit="handleSubmit">
         <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           <!-- Left: scrollable -->
           <div class="w-full lg:flex-1 lg:min-w-0 space-y-4 md:space-y-6">
@@ -60,10 +60,15 @@
                 <!-- Beat Cover -->
                 <div class="flex-shrink-0 flex flex-col">
                   <p class="text-xs font-medium text-gray-400 mb-2">
-                    Beat cover
+                    Beat cover <span class="text-red-400">*</span>
                   </p>
                   <div
-                    class="flex-1 w-full sm:w-48 aspect-square sm:aspect-auto rounded-xl border-2 border-dashed border-gray-600 bg-[#0d1230] flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer hover:border-blue-500 transition-colors sm:min-h-[8rem] overflow-hidden"
+                    class="flex-1 w-full sm:w-48 aspect-square sm:aspect-auto rounded-xl border-2 border-dashed bg-[#0d1230] flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer hover:border-blue-500 transition-colors sm:min-h-[8rem] overflow-hidden"
+                    :class="
+                      submitAttempted && !beatCoverUrl
+                        ? 'border-red-500'
+                        : 'border-gray-600'
+                    "
                     @click="handleBeatCoverUpload"
                   >
                     <img
@@ -77,23 +82,35 @@
                       <p class="text-xs">Click to upload</p>
                     </template>
                   </div>
+                  <p
+                    v-if="submitAttempted && !beatCoverUrl"
+                    class="text-red-400 text-xs mt-1"
+                  >
+                    Beat cover is required
+                  </p>
                 </div>
 
                 <!-- Title + Description -->
                 <div class="flex-1 flex flex-col gap-4">
                   <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1"
-                      >Title</label
-                    >
+                    <label class="block text-xs font-medium text-gray-400 mb-1">
+                      Title <span class="text-red-400">*</span>
+                    </label>
                     <InputCharCount :current="title.length" :max="80">
-                      <input
+                      <VField
                         v-model="title"
+                        name="title"
                         type="text"
                         placeholder="Beat title"
-                        :maxlength="80"
+                        maxlength="80"
+                        rules="required|min:3|max:80"
                         class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-2.5 pr-16 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                       />
                     </InputCharCount>
+                    <VErrorMessage
+                      name="title"
+                      class="text-red-400 text-xs mt-1"
+                    />
                   </div>
                   <div class="flex-1">
                     <label class="block text-xs font-medium text-gray-400 mb-1"
@@ -128,46 +145,55 @@
               </h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label class="block text-xs font-medium text-gray-400 mb-1"
-                    >Key</label
-                  >
-                  <select
+                  <label class="block text-xs font-medium text-gray-400 mb-1">
+                    Key <span class="text-red-400">*</span>
+                  </label>
+                  <VField
                     v-model="selectedKey"
+                    name="key"
+                    as="select"
+                    rules="required"
                     class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500"
                   >
                     <option value="">Select key</option>
                     <option v-for="key in musicalKeys" :key="key" :value="key">
                       {{ key }}
                     </option>
-                  </select>
+                  </VField>
+                  <VErrorMessage name="key" class="text-red-400 text-xs mt-1" />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-400 mb-1"
-                    >BPM</label
-                  >
-                  <input
-                    v-model.number="bpm"
+                  <label class="block text-xs font-medium text-gray-400 mb-1">
+                    BPM <span class="text-red-400">*</span>
+                  </label>
+                  <VField
+                    v-model="bpm"
+                    name="bpm"
                     type="number"
                     placeholder="140"
-                    min="40"
-                    max="300"
+                    rules="required|min_value:40|max_value:250"
                     class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   />
+                  <VErrorMessage name="bpm" class="text-red-400 text-xs mt-1" />
                 </div>
               </div>
               <div class="mb-4">
-                <label class="block text-xs font-medium text-gray-400 mb-1"
-                  >Genre</label
-                >
-                <select
+                <label class="block text-xs font-medium text-gray-400 mb-1">
+                  Genre <span class="text-red-400">*</span>
+                </label>
+                <VField
                   v-model="selectedGenre"
+                  name="genre"
+                  as="select"
+                  rules="required"
                   class="w-full bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Select genre</option>
                   <option v-for="genre in genres" :key="genre" :value="genre">
                     {{ genre }}
                   </option>
-                </select>
+                </VField>
+                <VErrorMessage name="genre" class="text-red-400 text-xs mt-1" />
               </div>
               <div>
                 <div class="flex items-center justify-between mb-1">
@@ -226,59 +252,86 @@
               </h2>
               <div class="space-y-3">
                 <div
-                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                  class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4"
                 >
-                  <div class="sm:w-28 text-sm text-gray-300">Basic</div>
-                  <div class="relative flex-1">
-                    <span
-                      class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      >€</span
-                    >
-                    <input
-                      v-model.number="priceBasic"
-                      type="number"
-                      placeholder="29.99"
-                      min="0"
-                      step="0.01"
-                      class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  <div class="sm:w-28 text-sm text-gray-300 pt-2.5">
+                    Basic <span class="text-red-400">*</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="relative">
+                      <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        >€</span
+                      >
+                      <VField
+                        v-model="priceBasic"
+                        name="priceBasic"
+                        type="number"
+                        placeholder="29.99"
+                        step="0.01"
+                        rules="price"
+                        class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <VErrorMessage
+                      name="priceBasic"
+                      class="text-red-400 text-xs mt-1"
                     />
                   </div>
                 </div>
                 <div
-                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                  class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4"
                 >
-                  <div class="sm:w-28 text-sm text-gray-300">Premium</div>
-                  <div class="relative flex-1">
-                    <span
-                      class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      >€</span
-                    >
-                    <input
-                      v-model.number="pricePremium"
-                      type="number"
-                      placeholder="59.99"
-                      min="0"
-                      step="0.01"
-                      class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  <div class="sm:w-28 text-sm text-gray-300 pt-2.5">
+                    Premium <span class="text-red-400">*</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="relative">
+                      <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        >€</span
+                      >
+                      <VField
+                        v-model="pricePremium"
+                        name="pricePremium"
+                        type="number"
+                        placeholder="59.99"
+                        step="0.01"
+                        rules="price"
+                        class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <VErrorMessage
+                      name="pricePremium"
+                      class="text-red-400 text-xs mt-1"
                     />
                   </div>
                 </div>
                 <div
-                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+                  class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4"
                 >
-                  <div class="sm:w-28 text-sm text-gray-300">Exclusive</div>
-                  <div class="relative flex-1">
-                    <span
-                      class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      >€</span
-                    >
-                    <input
-                      v-model.number="priceExclusive"
-                      type="number"
-                      placeholder="299.99"
-                      min="0"
-                      step="0.01"
-                      class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  <div class="sm:w-28 text-sm text-gray-300 pt-2.5">
+                    Exclusive <span class="text-red-400">*</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="relative">
+                      <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        >€</span
+                      >
+                      <VField
+                        v-model="priceExclusive"
+                        name="priceExclusive"
+                        type="number"
+                        placeholder="299.99"
+                        step="0.01"
+                        rules="price"
+                        class="w-full bg-[#0d1230] border border-gray-700 rounded-xl pl-7 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <VErrorMessage
+                      name="priceExclusive"
+                      class="text-red-400 text-xs mt-1"
                     />
                   </div>
                 </div>
@@ -302,10 +355,17 @@
               <div class="mb-3">
                 <p class="text-xs font-medium text-gray-400 mb-1.5">
                   WAV <span class="text-gray-500">(untagged)</span>
+                  <span class="text-red-400">*</span>
                 </p>
                 <div
-                  class="flex items-center gap-3 bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
-                  :class="wavUrl ? 'border-green-600' : ''"
+                  class="flex items-center gap-3 bg-[#0d1230] border rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
+                  :class="
+                    wavUrl
+                      ? 'border-green-600'
+                      : submitAttempted && !wavUrl
+                        ? 'border-red-500'
+                        : 'border-gray-700'
+                  "
                   @click="handleWavUpload"
                 >
                   <Icon
@@ -321,17 +381,32 @@
                   </span>
                   <Icon name="ph:upload-simple" class="w-4 h-4 text-gray-500" />
                 </div>
-                <p class="text-xs text-gray-600 mt-1">WAV only, max 100 MB</p>
+                <p
+                  v-if="submitAttempted && !wavUrl"
+                  class="text-red-400 text-xs mt-1"
+                >
+                  WAV file is required
+                </p>
+                <p v-else class="text-xs text-gray-600 mt-1">
+                  WAV only, max 100 MB
+                </p>
               </div>
 
               <!-- MP3 Tagged -->
               <div>
                 <p class="text-xs font-medium text-gray-400 mb-1.5">
                   MP3 <span class="text-gray-500">(tagged)</span>
+                  <span class="text-red-400">*</span>
                 </p>
                 <div
-                  class="flex items-center gap-3 bg-[#0d1230] border border-gray-700 rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
-                  :class="mp3Url ? 'border-green-600' : ''"
+                  class="flex items-center gap-3 bg-[#0d1230] border rounded-xl px-4 py-3 cursor-pointer hover:border-blue-500 transition-colors"
+                  :class="
+                    mp3Url
+                      ? 'border-green-600'
+                      : submitAttempted && !mp3Url
+                        ? 'border-red-500'
+                        : 'border-gray-700'
+                  "
                   @click="handleMp3Upload"
                 >
                   <Icon
@@ -347,7 +422,15 @@
                   </span>
                   <Icon name="ph:upload-simple" class="w-4 h-4 text-gray-500" />
                 </div>
-                <p class="text-xs text-gray-600 mt-1">MP3 only, max 50 MB</p>
+                <p
+                  v-if="submitAttempted && !mp3Url"
+                  class="text-red-400 text-xs mt-1"
+                >
+                  MP3 file is required
+                </p>
+                <p v-else class="text-xs text-gray-600 mt-1">
+                  MP3 only, max 50 MB
+                </p>
               </div>
             </div>
 
@@ -370,6 +453,11 @@
               </p>
             </div>
 
+            <!-- Server error -->
+            <p v-if="serverError" class="text-red-400 text-sm text-center">
+              {{ serverError }}
+            </p>
+
             <!-- Save Changes -->
             <button
               type="submit"
@@ -380,7 +468,7 @@
             </button>
           </div>
         </div>
-      </form>
+      </VForm>
     </div>
   </div>
 </template>
@@ -433,6 +521,8 @@ const pricePremium = ref<number | null>(beat?.pricePremium || null);
 const priceExclusive = ref<number | null>(beat?.priceExclusive || null);
 const isPublished = ref(beat?.isPublished ?? true);
 const loading = ref(false);
+const serverError = ref("");
+const submitAttempted = ref(false);
 const showDeleteModal = ref(false);
 const audioDuration = ref(0);
 
@@ -445,6 +535,12 @@ const {
 } = useBeatForm(beatCoverUrl, wavUrl, mp3Url, tags, tagInput, audioDuration);
 
 const handleSubmit = async () => {
+  submitAttempted.value = true;
+  serverError.value = "";
+
+  // Validate file uploads (outside VForm scope)
+  if (!beatCoverUrl.value || !wavUrl.value || !mp3Url.value) return;
+
   loading.value = true;
 
   try {
@@ -471,7 +567,8 @@ const handleSubmit = async () => {
     router.push(`/dashboard/beat/${beatId}`);
   } catch (err: any) {
     console.error("Failed to update beat:", err);
-    alert(err?.data?.message || "Failed to save changes. Please try again.");
+    serverError.value =
+      err?.data?.message || "Failed to save changes. Please try again.";
   } finally {
     loading.value = false;
   }

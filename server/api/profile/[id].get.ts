@@ -21,8 +21,21 @@ export default defineEventHandler(async (event) => {
         bio: true,
         profilePicture: true,
         socialLinks: true,
+        likedTracksPublic: true,
         createdAt: true,
         updatedAt: true,
+        user: {
+          select: {
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+            beats: true,
+          },
+        },
       },
     });
 
@@ -43,30 +56,46 @@ export default defineEventHandler(async (event) => {
             : profile.socialLinks;
         formattedSocialLinks = {
           instagram: parsed.instagram || null,
+          twitter: parsed.twitter || null,
           soundcloud: parsed.soundcloud || null,
-          youtube: parsed.youtube || null,
+          spotify: parsed.spotify || null,
         };
       } catch (e) {
         formattedSocialLinks = {};
       }
     }
 
+    // Count total plays across all beats by this producer
+    const totalPlays = await prisma.play.count({
+      where: {
+        beat: {
+          producerId: profile.id,
+        },
+      },
+    });
+
     // Return formatted profile data
     return {
       id: profile.id,
       userId: profile.userId,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
       username: profile.username,
       role: profile.role,
       bio: profile.bio,
       profilePicture: profile.profilePicture,
       socialLinks: formattedSocialLinks,
+      likedTracksPublic: profile.likedTracksPublic,
+      user: {
+        email: profile.user.email,
+      },
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
       stats: {
-        followers: 0, // TODO: Implement follower count
-        following: 0, // TODO: Implement following count
-        plays: 0, // TODO: Implement plays count
-        tracks: 0, // TODO: Implement tracks count
+        followers: profile._count.followers,
+        following: profile._count.following,
+        plays: totalPlays,
+        tracks: profile._count.beats,
       },
     };
   } catch (error: any) {

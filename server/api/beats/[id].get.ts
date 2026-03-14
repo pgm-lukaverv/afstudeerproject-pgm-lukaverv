@@ -1,3 +1,5 @@
+import { formatDuration } from "~~/server/utils/formatters";
+
 export default defineEventHandler(async (event) => {
   try {
     const id = getRouterParam(event, "id");
@@ -21,6 +23,13 @@ export default defineEventHandler(async (event) => {
             username: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+            plays: true,
+          },
+        },
       },
     });
 
@@ -32,9 +41,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Format duration to MM:SS
-    const minutes = Math.floor(beat.duration / 60);
-    const seconds = beat.duration % 60;
-    const formattedDuration = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    const formattedDuration = formatDuration(beat.duration);
 
     return {
       id: beat.id,
@@ -56,6 +63,10 @@ export default defineEventHandler(async (event) => {
       audioUrl: beat.audioFile,
       isPublished: beat.isPublished,
       isExclusiveSold: beat.isExclusiveSold,
+      likesCount: beat._count.likes,
+      commentsCount: beat._count.comments,
+      playsCount: beat._count.plays,
+      createdAt: beat.createdAt,
     };
   } catch (error) {
     console.error("Error fetching beat:", error);

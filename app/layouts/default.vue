@@ -14,6 +14,9 @@
 
     <!-- Back to Top Button -->
     <BackToTop />
+
+    <!-- Global modals -->
+    <BeatPublishedModal />
   </div>
 </template>
 
