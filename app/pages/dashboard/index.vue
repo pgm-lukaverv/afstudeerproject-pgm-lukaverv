@@ -78,148 +78,149 @@
           </Suspense>
 
           <!-- Stats Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Top Tracks -->
-            <div class="bg-dark-800 rounded-xl p-8 shadow-2xl">
-              <div class="flex items-center justify-between mb-6">
-                <div>
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-white">Top Performers</h2>
+              <PeriodFilter v-model="analyticsPeriod" />
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Top Tracks -->
+              <div class="bg-dark-800 rounded-xl p-8 shadow-2xl">
+                <div class="mb-6">
                   <h2 class="text-2xl font-bold text-white">Top Tracks</h2>
                   <p class="text-sm text-gray-400 mt-1">
                     {{ analyticsPeriodLabel }}
                   </p>
                 </div>
-                <PeriodFilter v-model="analyticsPeriod" />
+
+                <div class="space-y-3">
+                  <div
+                    v-if="topTracks.length === 0"
+                    class="text-center py-8 text-gray-400"
+                  >
+                    <p>No plays yet. Share your beats to get started!</p>
+                  </div>
+                  <NuxtLink
+                    v-for="(track, index) in topTracks"
+                    :key="index"
+                    :to="`/dashboard/beat/${track.id}`"
+                    class="group flex items-center gap-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl p-4 transition-all duration-300"
+                  >
+                    <span
+                      class="flex-shrink-0 w-5 text-right text-sm font-semibold text-gray-500"
+                      >{{ index + 1 }}</span
+                    >
+                    <img
+                      :src="track.image"
+                      :alt="track.title"
+                      class="w-14 h-14 rounded-lg object-cover bg-dark-600 group-hover:scale-105 transition-transform flex-shrink-0"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <p
+                        class="text-white font-semibold truncate group-hover:text-primary-400 transition-colors"
+                      >
+                        {{ track.title }}
+                      </p>
+                      <p class="text-xs text-gray-500 mt-0.5">
+                        {{ track.bpm }} BPM
+                      </p>
+                      <div class="flex items-center gap-3 mt-1.5">
+                        <span
+                          class="flex items-center gap-1 text-xs text-gray-400"
+                        >
+                          <Icon
+                            name="ph:play-fill"
+                            size="12"
+                            class="text-primary-400"
+                          />
+                          {{ track.plays }}
+                        </span>
+                        <span
+                          class="flex items-center gap-1 text-xs text-gray-400"
+                        >
+                          <Icon
+                            name="ph:heart-fill"
+                            size="12"
+                            class="text-red-400"
+                          />
+                          {{ track.likes }}
+                        </span>
+                        <span
+                          class="flex items-center gap-1 text-xs text-gray-400"
+                        >
+                          <Icon
+                            name="ph:chat-circle-fill"
+                            size="12"
+                            class="text-blue-400"
+                          />
+                          {{ track.comments }}
+                        </span>
+                      </div>
+                    </div>
+                  </NuxtLink>
+                </div>
               </div>
 
-              <div class="space-y-3">
-                <div
-                  v-if="topTracks.length === 0"
-                  class="text-center py-8 text-gray-400"
-                >
-                  <p>No plays yet. Share your beats to get started!</p>
+              <!-- Top Fans -->
+              <div class="bg-dark-800 rounded-xl p-8 shadow-2xl">
+                <div class="mb-6">
+                  <h2 class="text-2xl font-bold text-white">Top Fans</h2>
+                  <p class="text-sm text-gray-400 mt-1">
+                    {{ analyticsPeriodLabel }}
+                  </p>
                 </div>
-                <NuxtLink
-                  v-for="(track, index) in topTracks"
-                  :key="index"
-                  :to="`/dashboard/beat/${track.id}`"
-                  class="group flex items-center gap-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl p-4 transition-all duration-300"
-                >
-                  <span
-                    class="flex-shrink-0 w-5 text-right text-sm font-semibold text-gray-500"
-                    >{{ index + 1 }}</span
+
+                <div class="space-y-3">
+                  <div
+                    v-if="topFans.length === 0"
+                    class="text-center py-8 text-gray-400"
                   >
-                  <img
-                    :src="track.image"
-                    :alt="track.title"
-                    class="w-14 h-14 rounded-lg object-cover bg-dark-600 group-hover:scale-105 transition-transform flex-shrink-0"
-                  />
-                  <div class="flex-1 min-w-0">
-                    <p
-                      class="text-white font-semibold truncate group-hover:text-primary-400 transition-colors"
+                    <p>No fans yet. Keep promoting your beats!</p>
+                  </div>
+                  <NuxtLink
+                    v-for="(fan, index) in topFans"
+                    :key="index"
+                    :to="fan.userId ? `/profile/${fan.userId}` : '#'"
+                    class="group flex items-center gap-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl p-4 transition-all duration-300"
+                  >
+                    <span
+                      class="flex-shrink-0 w-5 text-right text-sm font-semibold text-gray-500"
+                      >{{ index + 1 }}</span
                     >
-                      {{ track.title }}
-                    </p>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                      {{ track.bpm }} BPM
-                    </p>
-                    <div class="flex items-center gap-3 mt-1.5">
+                    <img
+                      v-if="fan.profilePicture"
+                      :src="fan.profilePicture"
+                      :alt="fan.username"
+                      class="w-14 h-14 rounded-full object-cover flex-shrink-0 group-hover:scale-105 transition-transform"
+                    />
+                    <div
+                      v-else
+                      class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0"
+                    >
+                      <span class="text-white font-bold text-xl">{{
+                        fan.username.charAt(0).toUpperCase()
+                      }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p
+                        class="text-white font-semibold truncate group-hover:text-primary-400 transition-colors"
+                      >
+                        {{ fan.username }}
+                      </p>
                       <span
-                        class="flex items-center gap-1 text-xs text-gray-400"
+                        class="flex items-center gap-1 text-xs text-gray-400 mt-1"
                       >
                         <Icon
                           name="ph:play-fill"
                           size="12"
                           class="text-primary-400"
                         />
-                        {{ track.plays }}
-                      </span>
-                      <span
-                        class="flex items-center gap-1 text-xs text-gray-400"
-                      >
-                        <Icon
-                          name="ph:heart-fill"
-                          size="12"
-                          class="text-red-400"
-                        />
-                        {{ track.likes }}
-                      </span>
-                      <span
-                        class="flex items-center gap-1 text-xs text-gray-400"
-                      >
-                        <Icon
-                          name="ph:chat-circle-fill"
-                          size="12"
-                          class="text-blue-400"
-                        />
-                        {{ track.comments }}
+                        {{ fan.plays }} total plays on your tracks
                       </span>
                     </div>
-                  </div>
-                </NuxtLink>
-              </div>
-            </div>
-
-            <!-- Top Fans -->
-            <div class="bg-dark-800 rounded-xl p-8 shadow-2xl">
-              <div class="flex items-center justify-between mb-6">
-                <div>
-                  <h2 class="text-2xl font-bold text-white">Top Fans</h2>
-                  <p class="text-sm text-gray-400 mt-1">
-                    {{ analyticsPeriodLabel }}
-                  </p>
+                  </NuxtLink>
                 </div>
-                <PeriodFilter v-model="analyticsPeriod" />
-              </div>
-
-              <div class="space-y-3">
-                <div
-                  v-if="topFans.length === 0"
-                  class="text-center py-8 text-gray-400"
-                >
-                  <p>No fans yet. Keep promoting your beats!</p>
-                </div>
-                <NuxtLink
-                  v-for="(fan, index) in topFans"
-                  :key="index"
-                  :to="fan.userId ? `/profile/${fan.userId}` : '#'"
-                  class="group flex items-center gap-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl p-4 transition-all duration-300"
-                >
-                  <span
-                    class="flex-shrink-0 w-5 text-right text-sm font-semibold text-gray-500"
-                    >{{ index + 1 }}</span
-                  >
-                  <img
-                    v-if="fan.profilePicture"
-                    :src="fan.profilePicture"
-                    :alt="fan.username"
-                    class="w-14 h-14 rounded-full object-cover flex-shrink-0 group-hover:scale-105 transition-transform"
-                  />
-                  <div
-                    v-else
-                    class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0"
-                  >
-                    <span class="text-white font-bold text-xl">{{
-                      fan.username.charAt(0).toUpperCase()
-                    }}</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p
-                      class="text-white font-semibold truncate group-hover:text-primary-400 transition-colors"
-                    >
-                      {{ fan.username }}
-                    </p>
-                    <span
-                      class="flex items-center gap-1 text-xs text-gray-400 mt-1"
-                    >
-                      <Icon
-                        name="ph:play-fill"
-                        size="12"
-                        class="text-primary-400"
-                      />
-                      {{ fan.plays }} total plays on your tracks
-                    </span>
-                  </div>
-                </NuxtLink>
               </div>
             </div>
           </div>

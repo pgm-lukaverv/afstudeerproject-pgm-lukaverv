@@ -91,8 +91,9 @@ export default defineEventHandler(async (event) => {
     }),
   ]);
 
-  // Sort beats by play count, take top 5
+  // Only include beats with plays in the selected period, sort by play count, take top 5
   const topTracks = beatsWithPlays
+    .filter((b) => b._count.plays > 0)
     .sort((a, b) => b._count.plays - a._count.plays)
     .slice(0, 5);
 
