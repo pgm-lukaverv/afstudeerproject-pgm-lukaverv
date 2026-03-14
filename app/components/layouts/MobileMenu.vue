@@ -111,6 +111,26 @@
         <!-- User Actions (if logged in) -->
         <div v-if="currentUser" class="space-y-2 pt-6 border-t border-gray-700">
           <NuxtLink
+            :to="`/profile/${userProfile?.userId}`"
+            @click="$emit('close')"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            active-class="bg-blue-600/10 text-blue-400"
+          >
+            <Icon name="mdi:account" class="w-5 h-5" />
+            <span class="font-medium">Profile</span>
+          </NuxtLink>
+
+          <NuxtLink
+            :to="`/profile/${userProfile?.userId}/liked-tracks`"
+            @click="$emit('close')"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            active-class="bg-blue-600/10 text-blue-400"
+          >
+            <Icon name="ph:heart" class="w-5 h-5" />
+            <span class="font-medium">Liked Tracks</span>
+          </NuxtLink>
+
+          <NuxtLink
             to="/settings"
             @click="$emit('close')"
             class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
@@ -172,22 +192,11 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
-const { signOut } = useAuth();
+const { logout } = useLogout();
 
 // Handle logout from mobile menu
 const handleLogout = async () => {
   emit("close");
-  // Clear JWT cookie (manual login) and OAuth session
-  await $fetch("/api/auth/logout", { method: "POST" });
-  await signOut({ callbackUrl: "/auth/login" });
-
-  // Clear cached user data
-  const userProfile = useState("userProfile");
-  const username = useState("username");
-  const loading = useState("navbarLoading");
-
-  userProfile.value = null;
-  username.value = "User";
-  loading.value = true;
+  await logout();
 };
 </script>

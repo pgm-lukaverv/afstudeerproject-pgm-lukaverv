@@ -78,11 +78,21 @@
         <div class="text-center mb-8">
           <!-- Profile Picture -->
           <div class="flex justify-center mb-4">
-            <img
-              :src="userData.profilePicture"
-              :alt="userData.username"
-              class="h-24 w-24 md:h-32 md:w-32 rounded-full object-cover border-4 border-blue-500/20 shadow-xl"
-            />
+            <div
+              class="h-24 w-24 md:h-32 md:w-32 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-4 border-blue-500/20 shadow-xl"
+            >
+              <img
+                v-if="userData.profilePicture"
+                :src="userData.profilePicture"
+                :alt="userData.username"
+                class="w-full h-full object-cover"
+              />
+              <Icon
+                v-else
+                name="mdi:account-circle"
+                class="w-20 md:w-28 h-20 md:h-28 text-gray-300"
+              />
+            </div>
           </div>
 
           <!-- Username -->
@@ -91,39 +101,52 @@
           >
             {{ userData.username }}
           </h1>
+
+          <!-- Follow Button -->
+          <div v-if="!isOwnProfile" class="flex justify-center mt-6">
+            <button
+              @click="toggleFollow"
+              :class="
+                isFollowing
+                  ? 'bg-gray-700 hover:bg-red-900/50 text-gray-200 hover:text-red-400 border border-gray-600 hover:border-red-500/50'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              "
+              class="px-8 py-2.5 font-semibold rounded-lg transition-all duration-200 flex items-center gap-2"
+            >
+              <Icon
+                :name="isFollowing ? 'ph:user-check' : 'ph:user-plus'"
+                size="18"
+              />
+              {{ isFollowing ? "Following" : "Follow" }}
+            </button>
+          </div>
         </div>
 
         <!-- Stats Grid -->
         <div
-          class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
+          class="grid gap-4 md:gap-6 pt-6 border-t border-gray-700/30"
+          :class="
+            userData.role === 'PRODUCER'
+              ? 'grid-cols-2 md:grid-cols-4'
+              : 'grid-cols-2'
+          "
         >
           <!-- Followers -->
           <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
             <Icon name="ph:users" class="text-gray-400 text-2xl mx-auto mb-2" />
             <div class="text-xl md:text-2xl font-bold text-white mb-1">
-              {{ userData.stats?.followers || 0 }}
+              {{ followerCount }}
             </div>
             <div class="text-xs md:text-sm text-gray-400 font-medium">
               Followers
             </div>
           </div>
 
-          <!-- Following -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
-            <Icon
-              name="ph:user-plus"
-              class="text-gray-400 text-2xl mx-auto mb-2"
-            />
-            <div class="text-xl md:text-2xl font-bold text-white mb-1">
-              {{ userData.stats?.following || 0 }}
-            </div>
-            <div class="text-xs md:text-sm text-gray-400 font-medium">
-              Following
-            </div>
-          </div>
-
-          <!-- Plays -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
+          <!-- Plays (Producer only) -->
+          <div
+            v-if="userData.role === 'PRODUCER'"
+            class="text-center p-4 bg-[#0f1219]/50 rounded-lg"
+          >
             <Icon
               name="ph:play-circle"
               class="text-gray-400 text-2xl mx-auto mb-2"
@@ -136,8 +159,11 @@
             </div>
           </div>
 
-          <!-- Tracks -->
-          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
+          <!-- Tracks (Producer only) -->
+          <div
+            v-if="userData.role === 'PRODUCER'"
+            class="text-center p-4 bg-[#0f1219]/50 rounded-lg"
+          >
             <Icon
               name="ph:music-notes-simple"
               class="text-gray-400 text-2xl mx-auto mb-2"
@@ -151,9 +177,7 @@
           </div>
 
           <!-- Member Since -->
-          <div
-            class="col-span-2 md:col-span-1 text-center p-4 bg-[#0f1219]/50 rounded-lg"
-          >
+          <div class="text-center p-4 bg-[#0f1219]/50 rounded-lg">
             <Icon
               name="ph:calendar-check"
               class="text-gray-400 text-2xl mx-auto mb-2"
@@ -204,6 +228,21 @@
                 <span class="text-sm font-medium">Instagram</span>
               </a>
 
+              <!-- Twitter -->
+              <a
+                v-if="socialLinks.twitter"
+                :href="socialLinks.twitter"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 text-gray-300 hover:text-blue-400 transition-colors group"
+              >
+                <Icon
+                  name="ph:twitter-logo"
+                  class="text-xl group-hover:scale-110 transition-transform"
+                />
+                <span class="text-sm font-medium">Twitter</span>
+              </a>
+
               <!-- SoundCloud -->
               <a
                 v-if="socialLinks.soundcloud"
@@ -219,19 +258,19 @@
                 <span class="text-sm font-medium">SoundCloud</span>
               </a>
 
-              <!-- YouTube -->
+              <!-- Spotify -->
               <a
-                v-if="socialLinks.youtube"
-                :href="socialLinks.youtube"
+                v-if="socialLinks.spotify"
+                :href="socialLinks.spotify"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-300 hover:text-blue-400 transition-colors group"
               >
                 <Icon
-                  name="ph:youtube-logo"
+                  name="ph:spotify-logo"
                   class="text-xl group-hover:scale-110 transition-transform"
                 />
-                <span class="text-sm font-medium">Youtube</span>
+                <span class="text-sm font-medium">Spotify</span>
               </a>
             </div>
             <p v-else class="text-sm text-gray-300 leading-relaxed">
@@ -246,8 +285,8 @@
 
         <!-- Right Content Area -->
         <div class="space-y-8">
-          <!-- Popular Tracks -->
-          <div>
+          <!-- Popular Tracks (producers only) -->
+          <div v-if="userData.role === 'PRODUCER'">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-2xl md:text-3xl font-bold text-white">
                 Popular Tracks
@@ -320,9 +359,13 @@
                     {{ track.title }}
                   </p>
                 </NuxtLink>
-                <p class="text-xs text-gray-400 truncate">
+                <NuxtLink
+                  :to="`/profile/${track.producerUserId}`"
+                  @click.stop
+                  class="text-xs text-gray-400 hover:text-blue-400 transition-colors truncate block"
+                >
                   {{ track.genre }}
-                </p>
+                </NuxtLink>
                 <p class="text-sm font-bold text-blue-400 mt-2">
                   ${{ track.priceBasic }}
                 </p>
@@ -337,40 +380,76 @@
             </p>
           </div>
 
-          <!-- Playlists -->
+          <!-- Liked Tracks -->
           <div>
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-2xl md:text-3xl font-bold text-white">
-                Playlists
+                Liked Tracks
               </h2>
-              <button
+              <NuxtLink
+                v-if="isOwnProfile || userData?.likedTracksPublic !== false"
+                :to="`/profile/${profileId}/liked-tracks`"
                 class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-semibold text-sm md:text-base"
               >
                 See all
                 <Icon name="ph:caret-right" class="text-lg" />
-              </button>
+              </NuxtLink>
             </div>
 
-            <!-- Playlists Grid -->
+            <!-- Private message for non-owners -->
             <div
-              v-if="playlists.length > 0"
+              v-if="!isOwnProfile && userData?.likedTracksPublic === false"
+              class="flex items-center gap-3 p-6 bg-[#1a1f35]/40 rounded-xl border border-gray-700/30 text-gray-400"
+            >
+              <Icon
+                name="ph:lock"
+                class="text-2xl text-gray-500 flex-shrink-0"
+              />
+              <p class="text-sm">
+                This user's liked tracks are set to private.
+              </p>
+            </div>
+
+            <!-- Liked Tracks Grid -->
+            <div
+              v-else-if="likedTracks.length > 0"
               class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
             >
               <div
-                v-for="playlist in playlists"
-                :key="playlist.id"
+                v-for="track in likedTracks"
+                :key="track.id"
                 class="group cursor-pointer"
               >
                 <div
                   class="relative aspect-square mb-3 rounded-lg overflow-hidden"
                 >
                   <img
-                    :src="playlist.coverImage"
-                    :alt="playlist.title"
+                    :src="track.coverImage"
+                    :alt="track.title"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
+                  <!-- Waveform animation when playing -->
+                  <div
+                    v-if="playingBeatId === String(track.id) && isPlaying"
+                    @click.stop="togglePlay(track)"
+                    class="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer"
+                  >
+                    <div class="flex items-end gap-1 h-10">
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-1"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-2"
+                      ></div>
+                      <div
+                        class="w-1 bg-blue-400 rounded-full animate-eq-bar-3"
+                      ></div>
+                    </div>
+                  </div>
                   <!-- Play Overlay -->
                   <div
+                    v-else
+                    @click.stop="togglePlay(track)"
                     class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                   >
                     <div
@@ -383,19 +462,33 @@
                     </div>
                   </div>
                 </div>
-                <p class="text-sm font-semibold text-white truncate mb-1">
-                  {{ playlist.title }}
-                </p>
-                <p class="text-xs text-gray-400 truncate">
-                  {{ playlist.trackCount }} tracks
+                <NuxtLink :to="`/beat/${track.id}`">
+                  <p
+                    class="text-sm font-semibold text-white truncate mb-1 hover:text-blue-400 transition-colors"
+                  >
+                    {{ track.title }}
+                  </p>
+                </NuxtLink>
+                <NuxtLink
+                  :to="`/profile/${track.producerUserId}`"
+                  @click.stop
+                  class="text-xs text-gray-400 hover:text-blue-400 transition-colors truncate block"
+                >
+                  {{ track.producer }}
+                </NuxtLink>
+                <p class="text-sm font-bold text-blue-400 mt-2">
+                  ${{ track.priceBasic }}
                 </p>
               </div>
             </div>
-            <p v-else class="text-gray-400 text-center py-8">
+            <p
+              v-else-if="isOwnProfile || userData?.likedTracksPublic !== false"
+              class="text-gray-400 text-center py-8"
+            >
               {{
                 isOwnProfile
-                  ? "You haven't created any playlists yet."
-                  : "This user hasn't created any playlists yet."
+                  ? "You haven't liked any beats yet."
+                  : "This user hasn't liked any beats yet."
               }}
             </p>
           </div>
@@ -414,6 +507,7 @@ const { playingBeatId, isPlaying, togglePlay } = useBeatPlayer();
 
 // Fetch logged-in user to check if viewing own profile
 const currentUser = await useCurrentUser();
+const userProfile = useState("userProfile");
 
 // Fetch profile by user ID
 const {
@@ -424,6 +518,38 @@ const {
 
 // Check if this is the logged-in user's own profile
 const isOwnProfile = computed(() => currentUser?.id === profileId);
+
+// Follow state
+const isFollowing = ref(false);
+const followerCount = ref(userData.value?.stats?.followers ?? 0);
+
+// Fetch follow status once we have the logged-in profile
+if (userProfile.value?.id && userData.value?.id && !isOwnProfile.value) {
+  const status = await $fetch("/api/interactions/followers/check", {
+    params: {
+      followerProfileId: userProfile.value.id,
+      followingProfileId: userData.value.id,
+    },
+  }).catch(() => ({ following: false }));
+  isFollowing.value = status.following;
+}
+
+const toggleFollow = async () => {
+  if (!userProfile.value?.id) return navigateTo("/auth/login");
+  try {
+    const res = await $fetch("/api/interactions/followers/toggle", {
+      method: "POST",
+      body: {
+        followerProfileId: userProfile.value.id,
+        followingProfileId: userData.value.id,
+      },
+    });
+    isFollowing.value = res.following;
+    followerCount.value += res.following ? 1 : -1;
+  } catch (e) {
+    console.error("Failed to toggle follow:", e);
+  }
+};
 
 // Parse social links
 const socialLinks = computed(() => {
@@ -443,35 +569,52 @@ const socialLinks = computed(() => {
 const hasSocialLinks = computed(() => {
   return !!(
     socialLinks.value.instagram ||
+    socialLinks.value.twitter ||
     socialLinks.value.soundcloud ||
-    socialLinks.value.youtube
+    socialLinks.value.spotify
   );
 });
 
-// Fetch beats by profile ID - skip if no userData
+// Fetch beats by profile ID - only needed for producers
 const { data: beatsData } = await useFetch(() =>
-  userData.value ? `/api/producers/${userData.value.id}/beats` : null,
+  userData.value?.role === "PRODUCER"
+    ? `/api/producers/${userData.value.id}/beats`
+    : null,
 );
 
-// Popular tracks - use first 5 beats
+// Popular tracks - use first 5 beats (producers only)
 const popularTracks = computed(() => {
   if (!beatsData.value?.beats) return [];
   return beatsData.value.beats.slice(0, 5);
 });
 
-// Sync popular tracks to audio player playlist
-usePlaylistSync(popularTracks);
+// Fetch liked tracks
+const { data: likedData } = await useFetch(() =>
+  userData.value
+    ? `/api/interactions/likes/profile/${userData.value.id}`
+    : null,
+);
 
-// Playlists - temporarily use beats (will implement playlists later)
-const playlists = computed(() => {
-  if (!beatsData.value?.beats) return [];
-  return beatsData.value.beats.slice(0, 5).map((beat) => ({
-    id: beat.id,
-    title: beat.title,
-    trackCount: 1, // TODO: Implement actual playlist track count
-    coverImage: beat.coverImage,
-  }));
+// 5 most recently liked tracks for the profile preview
+const likedTracks = computed(() => {
+  if (!likedData.value?.beats) return [];
+  return likedData.value.beats.slice(0, 5);
 });
+
+// Combine both playlists for audio player - popular tracks first (if producer), then liked tracks
+const combinedPlaylist = computed(() => {
+  const tracks = [];
+  if (userData.value?.role === "PRODUCER" && popularTracks.value.length) {
+    tracks.push(...popularTracks.value);
+  }
+  if (likedTracks.value.length) {
+    tracks.push(...likedTracks.value);
+  }
+  return tracks;
+});
+
+// Sync combined playlist to audio player
+usePlaylistSync(combinedPlaylist);
 
 // Format member since date
 const formatMemberSince = (date) => {

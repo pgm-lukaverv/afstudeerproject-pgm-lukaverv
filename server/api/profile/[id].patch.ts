@@ -8,15 +8,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { username, profilePicture, bio, socialLinks } = await readBody(event);
-
-  // Validate at least one field is provided
-  if (!username && !profilePicture && bio === undefined && !socialLinks) {
-    throw createError({
-      statusCode: 400,
-      message: "At least one field is required for update",
-    });
-  }
+  const { username, profilePicture, bio, socialLinks, likedTracksPublic } =
+    await readBody(event);
 
   try {
     // Check if profile exists
@@ -50,9 +43,14 @@ export default defineEventHandler(async (event) => {
       where: { userId },
       data: {
         ...(username && { username }),
-        ...(profilePicture && { profilePicture }),
+        ...(profilePicture === null
+          ? { profilePicture: null }
+          : profilePicture
+            ? { profilePicture }
+            : {}),
         ...(bio !== undefined && { bio }),
         ...(socialLinks && { socialLinks }),
+        ...(likedTracksPublic !== undefined && { likedTracksPublic }),
         updatedAt: new Date(),
       },
       select: {
@@ -65,6 +63,7 @@ export default defineEventHandler(async (event) => {
         bio: true,
         profilePicture: true,
         socialLinks: true,
+        likedTracksPublic: true,
         createdAt: true,
         updatedAt: true,
         user: {

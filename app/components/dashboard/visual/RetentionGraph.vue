@@ -44,7 +44,22 @@
 
     <!-- Chart -->
     <div class="h-48 sm:h-56 md:h-64">
-      <ClientOnly>
+      <div
+        v-if="!hasData"
+        class="h-full flex items-center justify-center text-gray-500 text-sm"
+      >
+        <div class="text-center">
+          <Icon
+            name="ph:chart-line"
+            class="text-3xl mb-2 mx-auto text-gray-600"
+          />
+          <p>
+            No retention data yet. Plays will appear here once listeners start
+            playing this beat.
+          </p>
+        </div>
+      </div>
+      <ClientOnly v-else>
         <Line :data="chartData" :options="chartOptions" />
         <template #fallback>
           <div
@@ -84,12 +99,21 @@ const props = withDefaults(
     duration?: number;
     avgViewDuration?: string;
     avgPercentageViewed?: number;
+    beatRetention?: number[];
+    typicalRetention?: number[];
   }>(),
   {
     duration: 180,
-    avgViewDuration: "1:45",
-    avgPercentageViewed: 58,
+    avgViewDuration: "0:00",
+    avgPercentageViewed: 0,
+    beatRetention: () => [],
+    typicalRetention: () => [],
   },
+);
+
+const hasData = computed(
+  () =>
+    props.beatRetention.length > 0 && props.beatRetention.some((v) => v > 0),
 );
 
 const formatTime = (totalSeconds: number) => {
@@ -98,47 +122,18 @@ const formatTime = (totalSeconds: number) => {
   return `${m}:${String(s).padStart(2, "0")}`;
 };
 
-const retentionData = computed(() => {
-  const points = 50;
-  const data = [];
-
-  for (let i = 0; i <= points; i++) {
-    const progressRatio = i / points;
-
-    let beatRetention = 100;
-    beatRetention -= progressRatio * 25;
-
-    if (progressRatio > 0.25 && progressRatio < 0.35) {
-      beatRetention += 8 * Math.sin((progressRatio - 0.25) * Math.PI * 10);
-    }
-    if (progressRatio > 0.55 && progressRatio < 0.65) {
-      beatRetention += 12 * Math.sin((progressRatio - 0.55) * Math.PI * 10);
-    }
-
-    beatRetention -= Math.pow(progressRatio, 1.5) * 30;
-    beatRetention += Math.sin(progressRatio * 20) * 2;
-
-    let typicalRetention =
-      100 - progressRatio * 55 - Math.pow(progressRatio, 2) * 20;
-    typicalRetention += Math.sin(progressRatio * 15) * 1.5;
-
-    beatRetention = Math.max(25, Math.min(98, beatRetention));
-    typicalRetention = Math.max(15, Math.min(93, typicalRetention));
-
-    data.push({ progressRatio, beatRetention, typicalRetention });
-  }
-
-  return data;
-});
-
 const chartData = computed<ChartData<"line">>(() => {
-  const data = retentionData.value;
+  const points = props.beatRetention.length;
+  const labels = Array.from({ length: points }, (_, i) =>
+    formatTime((i / (points - 1)) * props.duration),
+  );
+
   return {
-    labels: data.map((p) => formatTime(p.progressRatio * props.duration)),
+    labels,
     datasets: [
       {
         label: "Typical retention",
-        data: data.map((p) => p.typicalRetention),
+        data: props.typicalRetention,
         borderColor: "rgba(107, 114, 128, 0.4)",
         backgroundColor: "rgba(75, 85, 99, 0.15)",
         fill: true,
@@ -149,7 +144,7 @@ const chartData = computed<ChartData<"line">>(() => {
       },
       {
         label: "This beat",
-        data: data.map((p) => p.beatRetention),
+        data: props.beatRetention,
         borderColor: "rgb(59, 130, 246)",
         backgroundColor: "rgba(59, 130, 246, 0.08)",
         fill: true,
