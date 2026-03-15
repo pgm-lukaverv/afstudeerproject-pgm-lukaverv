@@ -255,6 +255,7 @@
 // This page is protected by the producer-only middleware
 // Only producers can access this page
 definePageMeta({
+  title: "Dashboard",
   middleware: "producer-only",
 });
 

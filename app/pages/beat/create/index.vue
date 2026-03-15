@@ -456,9 +456,7 @@ useHead({
   ],
 });
 
-definePageMeta({
-  middleware: "producer-only",
-});
+definePageMeta({ title: "Create Beat", middleware: "producer-only" });
 
 const beatCoverUrl = ref("");
 const wavUrl = ref("");

@@ -499,6 +499,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Profile",
+});
+
 const route = useRoute();
 const profileId = route.params.id;
 
@@ -515,6 +519,15 @@ const {
   pending,
   error,
 } = await useFetch(`/api/profile/${profileId}`);
+
+// Set dynamic title based on profile data
+usePageTitle(
+  () =>
+    userData.value?.username
+      ? `${userData.value.username}'s Profile`
+      : undefined,
+  "Profile",
+);
 
 // Check if this is the logged-in user's own profile
 const isOwnProfile = computed(() => currentUser?.id === profileId);

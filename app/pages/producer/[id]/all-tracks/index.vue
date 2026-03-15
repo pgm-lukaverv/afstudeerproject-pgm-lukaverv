@@ -140,12 +140,25 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Producer Tracks",
+});
+
 const route = useRoute();
 const producerId = route.params.id;
 
 // Fetch producer and their beats
 const { data, pending, error } = await useFetch(
   `/api/producers/${producerId}/beats`,
+);
+
+// Set dynamic title based on producer username
+usePageTitle(
+  () =>
+    data.value?.producer?.username
+      ? `${data.value.producer.username}'s Beats`
+      : undefined,
+  "Producer Tracks",
 );
 
 // Modal state

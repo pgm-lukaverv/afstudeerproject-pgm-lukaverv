@@ -1,5 +1,6 @@
 <script setup>
 definePageMeta({
+  title: "My Profile",
   middleware: "require-verification",
 });
 

@@ -43,6 +43,9 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Forgot Password",
+});
 // Reactive variables for form inputs and state management
 const message = ref("");
 const error = ref("");

@@ -789,6 +789,7 @@ import { genres } from "~/data/filterData";
 
 // Require authentication
 definePageMeta({
+  title: "Settings",
   middleware: "auth",
 });
 

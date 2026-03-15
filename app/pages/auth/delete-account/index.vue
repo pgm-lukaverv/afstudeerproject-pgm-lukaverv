@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "default" });
+definePageMeta({ title: "Delete Account", layout: "default" });
 
 const route = useRoute();
 const { logout } = useLogout();

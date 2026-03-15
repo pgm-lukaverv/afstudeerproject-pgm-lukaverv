@@ -587,11 +587,18 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Beat",
+});
+
 const route = useRoute();
 const beatId = route.params.id;
 
 // Fetch beat details
 const { data: beat, pending, error } = await useFetch(`/api/beats/${beatId}`);
+
+// Set dynamic title based on beat data
+usePageTitle(() => beat.value?.title, "Beat");
 
 // Fetch more beats from the same producer using the dedicated endpoint
 const { data: producerData } = await useFetch(

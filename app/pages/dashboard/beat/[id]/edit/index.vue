@@ -486,6 +486,7 @@ useHead({
 });
 
 definePageMeta({
+  title: "Edit Beat",
   middleware: "producer-only",
 });
 
@@ -504,6 +505,12 @@ if (error.value || !beatData.value) {
 }
 
 const beat = beatData.value as any;
+
+// Set dynamic title based on beat data
+usePageTitle(
+  () => (beat?.title ? `Edit ${beat.title}` : undefined),
+  "Edit Beat",
+);
 
 // Pre-fill form with real beat data
 const beatCoverUrl = ref(beat?.coverImage || "");

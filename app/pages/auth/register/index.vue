@@ -88,6 +88,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Register",
+});
+
 // Reactive variables for state management
 const error = ref("");
 const success = ref("");

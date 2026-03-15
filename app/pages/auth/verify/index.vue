@@ -41,6 +41,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Verify Email",
+});
+
 const route = useRoute();
 
 const { redirectToLogin } = useNavigation();

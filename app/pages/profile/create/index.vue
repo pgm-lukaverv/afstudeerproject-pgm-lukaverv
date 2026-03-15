@@ -369,6 +369,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  title: "Create Profile",
+});
+
 // Load Cloudinary upload widget script
 useHead({
   script: [

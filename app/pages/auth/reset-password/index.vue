@@ -55,6 +55,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Reset Password",
+});
+
 // Reactive variables for form inputs and state management
 const route = useRoute();
 const message = ref("");

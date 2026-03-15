@@ -140,6 +140,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Liked Tracks",
+});
+
 const route = useRoute();
 const profileId = route.params.id;
 
@@ -153,6 +157,15 @@ const {
   pending,
   error,
 } = await useFetch(`/api/profile/${profileId}`);
+
+// Set dynamic title based on profile username
+usePageTitle(
+  () =>
+    profileData.value?.username
+      ? `${profileData.value.username}'s Likes`
+      : undefined,
+  "Liked Tracks",
+);
 
 // Redirect if liked tracks are private and viewer is not the owner
 if (

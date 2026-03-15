@@ -12,6 +12,57 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
   ],
 
+  app: {
+    head: {
+      title: "Beatstack",
+      htmlAttrs: {
+        lang: "en",
+      },
+      link: [
+        // Basic favicon
+        { rel: "icon", type: "image/x-icon", href: "/favicon/favicon.ico" },
+
+        // Standard sizes
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "16x16",
+          href: "/favicon/favicon-16x16.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "32x32",
+          href: "/favicon/favicon-32x32.png",
+        },
+
+        // Apple devices
+        {
+          rel: "apple-touch-icon",
+          sizes: "180x180",
+          href: "/favicon/apple-touch-icon.png",
+        },
+
+        // Android devices and PWA
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "192x192",
+          href: "/favicon/android-chrome-192x192.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "512x512",
+          href: "/favicon/android-chrome-512x512.png",
+        },
+
+        // Web App Manifest
+        { rel: "manifest", href: "/favicon/site.webmanifest" },
+      ],
+    },
+  },
+
   vite: {
     plugins: [[tsconfigPaths()]],
   },

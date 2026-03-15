@@ -29,6 +29,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Verification Pending",
+});
+
 // Import necessary composables for route and navigation handling
 const route = useRoute();
 

@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 definePageMeta({
+  title: "Unauthorized",
   layout: false,
 });
 

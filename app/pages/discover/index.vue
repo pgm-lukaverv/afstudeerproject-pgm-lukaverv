@@ -148,6 +148,7 @@
 import { genres, bpmLimits, musicalKeys } from "~/data/filterData";
 
 definePageMeta({
+  title: "Discover",
   middleware: "require-verification",
 });
 

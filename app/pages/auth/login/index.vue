@@ -79,6 +79,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  title: "Login",
+});
+
 // Reactive variables for form inputs and state management
 const error = ref("");
 const loading = ref(false);
