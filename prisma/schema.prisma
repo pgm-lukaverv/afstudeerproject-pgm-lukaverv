@@ -42,6 +42,8 @@ model Profile {
   trackPreference   TrackPreference? // Producer's default track preferences
   notifications     Notification[]   @relation("ReceivedNotifications")
   sentNotifications Notification[]   @relation("SentNotifications")
+  orders            Order[]
+  orderItems        OrderItem[]      @relation("BuyerOrderItems")
 }
 
 model TrackPreference {
@@ -91,6 +93,7 @@ model Beat {
   comments      Comment[]
   plays         Play[] // All plays for this beat
   notifications Notification[]
+  orderItems    OrderItem[]
 
   @@index([genre])
   @@index([bpm])
@@ -166,6 +169,7 @@ enum NotificationType {
   LIKE
   COMMENT
   FOLLOW
+  SALE
 }
 
 model Notification {
@@ -174,12 +178,14 @@ model Notification {
   actorId     String
   type        NotificationType
   beatId      String?
+  orderItemId String?
   isRead      Boolean          @default(false)
   createdAt   DateTime         @default(now())
 
-  recipient Profile @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
-  actor     Profile @relation("SentNotifications", fields: [actorId], references: [id], onDelete: Cascade)
-  beat      Beat?   @relation(fields: [beatId], references: [id], onDelete: Cascade)
+  recipient Profile    @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     Profile    @relation("SentNotifications", fields: [actorId], references: [id], onDelete: Cascade)
+  beat      Beat?      @relation(fields: [beatId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
   @@index([recipientId, isRead])
   @@index([recipientId, createdAt])
@@ -194,4 +200,52 @@ model BlacklistedToken {
 
   @@index([tokenHash])
   @@index([expiresAt])
+}
+
+enum LicenseType {
+  BASIC
+  PREMIUM
+  EXCLUSIVE
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  buyerId         String
+  status          OrderStatus @default(PENDING)
+  totalAmount     Float
+  stripeSessionId String?     @unique
+  stripePaymentId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  buyer Profile     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@index([buyerId])
+  @@index([stripeSessionId])
+}
+
+model OrderItem {
+  id          String      @id @default(cuid())
+  orderId     String
+  beatId      String
+  buyerId     String
+  licenseType LicenseType
+  price       Float
+  createdAt   DateTime    @default(now())
+
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  beat          Beat           @relation(fields: [beatId], references: [id], onDelete: Cascade)
+  buyer         Profile        @relation("BuyerOrderItems", fields: [buyerId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([orderId])
+  @@index([beatId])
+  @@index([buyerId])
 }
