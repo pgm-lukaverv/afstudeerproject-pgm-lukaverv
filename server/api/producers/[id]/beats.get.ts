@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
       where: {
         producerId: id,
         isPublished: true,
+        isExclusiveSold: false,
       },
       include: {
         producer: {

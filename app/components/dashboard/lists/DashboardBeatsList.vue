@@ -49,19 +49,11 @@
 
           <!-- Beat Info -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <h3
-                class="text-sm sm:text-base text-white font-medium truncate group-hover:text-primary-400 transition-colors"
-              >
-                {{ beat.title }}
-              </h3>
-              <span
-                v-if="beat.isExclusiveSold"
-                class="flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-600/20 text-purple-400"
-              >
-                SOLD
-              </span>
-            </div>
+            <h3
+              class="text-sm sm:text-base text-white font-medium truncate group-hover:text-primary-400 transition-colors"
+            >
+              {{ beat.title }}
+            </h3>
             <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
               <span class="text-xs sm:text-sm text-gray-400"
                 >{{ beat.bpm }} BPM</span
@@ -89,10 +81,6 @@
                   class="text-blue-400"
                 />
                 {{ beat.commentsCount ?? 0 }}
-              </span>
-              <span class="flex items-center gap-1 text-xs text-gray-500">
-                <Icon name="ph:receipt" size="11" class="text-green-400" />
-                {{ beat.soldCopies ?? 0 }}
               </span>
               <span class="text-xs text-gray-500">{{
                 formatDate(beat.createdAt)
@@ -189,8 +177,6 @@ interface Beat {
   playsCount?: number;
   likesCount?: number;
   commentsCount?: number;
-  soldCopies?: number;
-  isExclusiveSold?: boolean;
 }
 
 interface Props {
