@@ -85,18 +85,22 @@ export default defineNuxtConfig({
   ],
 
   auth: {
+    originEnvKey: "NUXT_AUTH_ORIGIN",
+
     baseURL:
       process.env.NUXT_AUTH_ORIGIN ||
       process.env.BASE_URL ||
       (process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : "http://localhost:3000"),
+
     provider: {
       type: "authjs",
       trustHost: true,
       defaultProvider: "github",
       addDefaultCallbackUrl: true,
     },
+
     globalAppMiddleware: {
       isEnabled: false,
     },
