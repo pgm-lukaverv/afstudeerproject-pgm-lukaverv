@@ -88,9 +88,12 @@ export default defineNuxtConfig({
     baseURL: process.env.BASE_URL || "http://localhost:3000",
     provider: {
       type: "authjs",
-      trustHost: false,
+      trustHost: true,
       defaultProvider: "github",
       addDefaultCallbackUrl: true,
+    },
+    globalAppMiddleware: {
+      isEnabled: false,
     },
   },
 
