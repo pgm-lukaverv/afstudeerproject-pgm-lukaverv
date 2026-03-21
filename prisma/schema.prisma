@@ -85,8 +85,6 @@ model Beat {
   audioFileWav  String // URL to WAV file (untagged)
   description   String?        @db.VarChar(1000)
   isPublished   Boolean        @default(false)
-  playCount     Int            @default(0)
-  downloadCount Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   producer      Profile        @relation(fields: [producerId], references: [id], onDelete: Cascade)
