@@ -1,0 +1,244 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  email String [unique, not null]
+  password String
+  provider String
+  providerId String
+  isVerified Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  profile Profile
+}
+
+Table Profile {
+  id String [pk]
+  userId String [unique, not null]
+  firstName String [not null]
+  lastName String [not null]
+  username String [unique, not null]
+  role Role [not null]
+  bio String
+  profilePicture String
+  socialLinks Json
+  likedTracksPublic Boolean [not null, default: true]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  user User [not null]
+  beats Beat [not null]
+  likes Like [not null]
+  comments Comment [not null]
+  following Follow [not null]
+  followers Follow [not null]
+  plays Play [not null]
+  trackPreference TrackPreference
+  notifications Notification [not null]
+  sentNotifications Notification [not null]
+  orders Order [not null]
+  orderItems OrderItem [not null]
+}
+
+Table TrackPreference {
+  id String [pk]
+  profileId String [unique, not null]
+  description String
+  genre String
+  priceBasic Float [default: 29.990000000000002]
+  pricePremium Float [default: 49.99]
+  priceExclusive Float [default: 199.99]
+  isPublished Boolean [not null, default: true]
+  tags String[] [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  profile Profile [not null]
+}
+
+Table Beat {
+  id String [pk]
+  title String [not null]
+  producerId String [not null]
+  genre String [not null]
+  bpm Int [not null]
+  key String
+  duration Int [not null]
+  tags String[] [not null]
+  priceBasic Float [not null]
+  pricePremium Float [not null]
+  priceExclusive Float [not null]
+  isExclusiveSold Boolean [not null, default: false]
+  exclusiveBuyer String
+  coverImage String [not null]
+  audioFileMp3 String [not null]
+  audioFileWav String [not null]
+  description String
+  isPublished Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  producer Profile [not null]
+  likes Like [not null]
+  comments Comment [not null]
+  plays Play [not null]
+  notifications Notification [not null]
+  orderItems OrderItem [not null]
+}
+
+Table Like {
+  id String [pk]
+  profileId String [not null]
+  beatId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  profile Profile [not null]
+  beat Beat [not null]
+
+  indexes {
+    (profileId, beatId) [unique]
+  }
+}
+
+Table Comment {
+  id String [pk]
+  profileId String [not null]
+  beatId String [not null]
+  text String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  profile Profile [not null]
+  beat Beat [not null]
+}
+
+Table Follow {
+  id String [pk]
+  followerProfileId String [not null]
+  followingProfileId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  follower Profile [not null]
+  following Profile [not null]
+
+  indexes {
+    (followerProfileId, followingProfileId) [unique]
+  }
+}
+
+Table Play {
+  id String [pk]
+  profileId String
+  beatId String [not null]
+  listenDuration Int
+  createdAt DateTime [default: `now()`, not null]
+  profile Profile
+  beat Beat [not null]
+}
+
+Table Notification {
+  id String [pk]
+  recipientId String [not null]
+  actorId String [not null]
+  type NotificationType [not null]
+  beatId String
+  orderItemId String
+  isRead Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  recipient Profile [not null]
+  actor Profile [not null]
+  beat Beat
+  orderItem OrderItem
+}
+
+Table BlacklistedToken {
+  id String [pk]
+  tokenHash String [unique, not null]
+  expiresAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Order {
+  id String [pk]
+  buyerId String [not null]
+  status OrderStatus [not null, default: 'PENDING']
+  totalAmount Float [not null]
+  stripeSessionId String [unique]
+  stripePaymentId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  buyer Profile [not null]
+  items OrderItem [not null]
+}
+
+Table OrderItem {
+  id String [pk]
+  orderId String [not null]
+  beatId String [not null]
+  buyerId String [not null]
+  licenseType LicenseType [not null]
+  price Float [not null]
+  createdAt DateTime [default: `now()`, not null]
+  order Order [not null]
+  beat Beat [not null]
+  buyer Profile [not null]
+  notifications Notification [not null]
+}
+
+Enum Role {
+  PRODUCER
+  LISTENER
+}
+
+Enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  SALE
+}
+
+Enum LicenseType {
+  BASIC
+  PREMIUM
+  EXCLUSIVE
+}
+
+Enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+Ref: Profile.userId - User.id [delete: Cascade]
+
+Ref: TrackPreference.profileId - Profile.id [delete: Cascade]
+
+Ref: Beat.producerId > Profile.id [delete: Cascade]
+
+Ref: Like.profileId > Profile.id [delete: Cascade]
+
+Ref: Like.beatId > Beat.id [delete: Cascade]
+
+Ref: Comment.profileId > Profile.id [delete: Cascade]
+
+Ref: Comment.beatId > Beat.id [delete: Cascade]
+
+Ref: Follow.followerProfileId > Profile.id [delete: Cascade]
+
+Ref: Follow.followingProfileId > Profile.id [delete: Cascade]
+
+Ref: Play.profileId > Profile.id [delete: Cascade]
+
+Ref: Play.beatId > Beat.id [delete: Cascade]
+
+Ref: Notification.recipientId > Profile.id [delete: Cascade]
+
+Ref: Notification.actorId > Profile.id [delete: Cascade]
+
+Ref: Notification.beatId > Beat.id [delete: Cascade]
+
+Ref: Notification.orderItemId > OrderItem.id [delete: Cascade]
+
+Ref: Order.buyerId > Profile.id [delete: Cascade]
+
+Ref: OrderItem.orderId > Order.id [delete: Cascade]
+
+Ref: OrderItem.beatId > Beat.id [delete: Cascade]
+
+Ref: OrderItem.buyerId > Profile.id [delete: Cascade]
